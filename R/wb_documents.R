@@ -46,7 +46,6 @@ fetch_wb_documents_json <- function(
       httr2::req_perform() |>
       httr2::resp_body_json()
   }
-  
 }
 
 #' Extract World Bank API documents from JSON
