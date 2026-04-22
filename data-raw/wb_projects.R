@@ -16,6 +16,22 @@ wb_projects <- read_csv(
 ) |>
   janitor::clean_names()
 
+# extracted from https://dataexplorer.worldbank.org/data/details?id=DS04532&t=Preview%20Data
+# on: 2026-04-22
+country_list <- read_csv(
+  here(
+    "data", "input", "wb-data-explorer",
+    "COUNTRY_04_22_2026.csv"
+  ),
+  skip = 4
+) |>
+  janitor::clean_names() |> 
+  filter(
+    str_count(cntry_cde) == 2 *
+      !is.na(iso3_cntry_cde)
+  ) |> 
+  distinct(cntry_cde, iso3_cntry_cde)
+
 wb_projects_clean <- wb_projects |> 
   select(
     proj_id,
@@ -40,6 +56,15 @@ wb_projects_clean <- wb_projects |>
       (str_detect(lead_gp, "GOV") |str_detect(contrib_gp, "GOV")) &
       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product") &
       proj_approval_fy >= 2015
-  )
+  ) |>
+  # fix country code
+  left_join(
+    country_list |> select(country_code = cntry_cde, country_code_clean = iso3_cntry_cde),
+    by = c("country_code")
+  ) |> 
+  mutate(
+    country_code = coalesce(country_code_clean, country_code)
+  ) |> 
+  select(-country_code_clean)
 
 usethis::use_data(wb_projects_clean, overwrite = TRUE)
