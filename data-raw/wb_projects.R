@@ -32,7 +32,7 @@ country_list <- read_csv(
   ) |> 
   distinct(cntry_cde, iso3_cntry_cde)
 
-wb_projects_clean <- wb_projects |> 
+wb_projects <- wb_projects |> 
   select(
     proj_id,
     proj_name = proj_display_name,
@@ -67,4 +67,4 @@ wb_projects_clean <- wb_projects |>
   ) |> 
   select(-country_code_clean)
 
-usethis::use_data(wb_projects_clean, overwrite = TRUE)
+usethis::use_data(wb_projects, overwrite = TRUE)

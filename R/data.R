@@ -90,4 +90,4 @@
 #'
 #' @source World Bank Data Explorer, Project Master V3 dataset:
 #'   https://dataexplorer.worldbank.org/data/details?id=DS04442
-"wb_projects_clean"
+"wb_projects"
