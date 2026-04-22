@@ -9,52 +9,10 @@ library(readr)
 
 devtools::load_all()
 
-# read-in data -----------------------------------------------------------
-theme_2017 <- read_csv(
-  here("data-raw", "input", "wb", "theme_taxonomy_2017.csv")
-) |> 
-  janitor::clean_names()
-
-theme_2025 <- read_csv(
-  here("data-raw", "input", "wb", "theme_taxonomy_2025.csv")
-) |> 
-  janitor::clean_names()
-
-theme_consolidated <- list(
-    `2017` = theme_2017,
-    `2025` = theme_2025
-  ) |> 
-  bind_rows(
-    .id = "year"
-  ) |> 
-  mutate(
-    across(starts_with("theme"), stringr::str_to_lower)
-  ) |>
-  pivot_wider(
-    id_cols = c(year, code),
-    names_from = level,
-    values_from = theme_name,
-    names_prefix = "level_"
-  ) |>
-  # fill down within each taxonomy
-  group_by(year) |>
-  fill(level_1, .direction = "down") |>
-  fill(level_2, .direction = "down") |>
-  ungroup() |>
-  # keep only level 3 rows (most granular)
-  filter(!is.na(level_3)) |>
-  rename(
-    theme_level_1 = level_1,
-    theme_level_2 = level_2,
-    theme_level_3 = level_3
-  ) 
-
 # fetch documents --------------------------------------------------------
 total <- fetch_wb_documents_json(
   doc_type = c(
-        "Report",
-        "Implementation Completion and Results Report",
-        "Implementation Completion Report Review"
+        "Project Appraisal Document"
       )
 ) |> 
   pluck("total")
@@ -68,9 +26,7 @@ while (skip_rows < total) {
     os = skip_rows,
     rows = n_rows,
     doc_type = c(
-        "Report",
-        "Implementation Completion and Results Report",
-        "Implementation Completion Report Review"
+        "Project Appraisal Document"
     )
   )
 
@@ -95,7 +51,8 @@ wb_documents <- documents_tbl |>
     doc_type = docty,
     doc_date = docdt,
     orig_unit = origu,
-    abstract = abstracts
+    abstract = abstracts,
+    proj_id = projectid
   ) |>
   # fix abstracts
   mutate(
@@ -143,64 +100,7 @@ wb_documents <- wb_documents |>
       "other",
       owner_label
     )
-  )
-
-# classify themes --------------------------------------------------------
-wb_documents <- wb_documents |> 
-  mutate(
-    theme = str_squish(theme) |> 
-      stringr::str_to_lower()
-  ) |>
-  # classify thematic category based on World Bank taxonomy from FY2017 and FY2025
-  # available at https://worldbankgroup.sharepoint.com/sites/OPCS/SitePages/PublishingPages/Sector%20and%20Theme%20Tax-1765299121360.aspx
-  rowwise() |>
-  mutate(
-    theme_category = {
-      if (is.na(theme)) {
-        NA_character_
-      } else {
-        categories <- c()
-        
-        # Personnel
-        if (str_detect(theme, "administrative and civil service reform|public administration, compensation, and management")) {
-          categories <- c(categories, "Personnel")
-        }
-        
-        # Public Financial Management
-        if (str_detect(theme, "public expenditure management|domestic revenue administration|debt management|public assets and investment management|government financial reporting and balance sheets|procurement|budget and treasury management")) {
-          categories <- c(categories, "Public Financial Management")
-        }
-        
-        # Integrity
-        if (str_detect(theme, "anticorruption transparency and political economy")) {
-          categories <- c(categories, "Integrity")
-        }
-        
-        # Transparency and Accountability
-        if (str_detect(theme, "transparency, accountability and good governance|oversight, accountability, and supreme audit institutions|government financial reporting and balance sheets|citizen engagement")) {
-          categories <- c(categories, "Transparency and Accountability")
-        }
-        
-        # Information Systems
-        if (str_detect(theme, "e-government, incl. e-services|civil registration and identification|data production, accessibility and use|institutional strengthening and capacity building|core government systems|public service delivery|govtech enabling environment|data")) {
-          categories <- c(categories, "Information Systems")
-        }
-        
-        # Subnational
-        if (str_detect(theme, "subnational fiscal policies|municipal institution building|intergovernmental and subnational institution building")) {
-          categories <- c(categories, "Subnational Governance")
-        }
-        
-        # Return concatenated or "Other"
-        if (length(categories) > 0) {
-          paste(categories, collapse = " | ")
-        } else {
-          "Other"
-        }
-      }
-    }
-  ) |>
-  ungroup() |> 
+  ) |> 
   # simplify dates
   mutate(
     doc_month = lubridate::round_date(

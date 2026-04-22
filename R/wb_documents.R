@@ -14,8 +14,8 @@
 fetch_wb_documents_json <- function(
     base_url = "https://search.worldbank.org/api/v3/wds",
     fl = "id,count,abstracts,authr,docdt,origu,owner,projectid,theme,topic,docty",
-    strdate = "2021-01-01",
-    enddate = "2025-12-31",
+    strdate = "2014-01-01",
+    enddate = "2026-04-22",
     doc_type = NULL,
     os = 0,
     rows = 200
@@ -41,8 +41,7 @@ fetch_wb_documents_json <- function(
         enddate = enddate,
         os = os,
         rows = rows,
-        docty_exact = paste(doc_type, collapse = "^") |> 
-          stringr::str_replace_all("\\s", "%20") 
+        docty_exact = paste(doc_type, collapse = "^")
       ) |>
       httr2::req_perform() |>
       httr2::resp_body_json()
