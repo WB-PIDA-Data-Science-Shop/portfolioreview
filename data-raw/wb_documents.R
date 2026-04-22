@@ -12,7 +12,8 @@ devtools::load_all()
 # fetch documents --------------------------------------------------------
 total <- fetch_wb_documents_json(
   doc_type = c(
-        "Project Appraisal Document"
+        "Project Appraisal Document",
+        "Staff Appraisal Report"
       )
 ) |> 
   pluck("total")
@@ -26,7 +27,8 @@ while (skip_rows < total) {
     os = skip_rows,
     rows = n_rows,
     doc_type = c(
-        "Project Appraisal Document"
+        "Project Appraisal Document",
+        "Staff Appraisal Report"
     )
   )
 

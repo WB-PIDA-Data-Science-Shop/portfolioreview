@@ -57,37 +57,66 @@
 #' World Bank Operations: Governance Portfolio (2015–present)
 #'
 #' A tibble of World Bank lending and advisory operations filtered to those
-#' led by or contributing to the Governance (GOV) Global Practice, approved
-#' from FY2015 onwards. Extracted from the Project Master V3 dataset on
-#' 2026-04-21 via the World Bank Data Explorer.
+#' led by or contributing to the Governance (GOV) Global Practice.
 #'
-#' @format A tibble with one row per operation and the following columns:
+#' @format A tibble with 796 rows and 16 columns:
 #' \describe{
 #'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 #'   \item{proj_name}{Character. Display name of the project.}
 #'   \item{proj_status}{Character. Current project status: \"Active\" or \"Pipeline\".}
 #'   \item{pdo}{Character. Project Development Objective description.}
-#'   \item{proj_approval_fy}{Integer. Fiscal year in which the project was approved.}
+#'   \item{proj_approval_fy}{Double. Fiscal year in which the project was approved.}
+#'   \item{proj_url}{Character. URL to the project page on the World Bank Operations Portal.}
 #'   \item{product_line_type}{Character. Product line type: \"Lending Product\" or
 #'     \"Analytic and Advisory Activities Product\".}
-#'   \item{product_line_name}{Character. Name of the product line.}
-#'   \item{country_code}{Character. ISO 3-letter country code.}
-#'   \item{country_name}{Character. Full country name.}
+#'   \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}
+#'   \item{country_code}{Character. ISO 3-letter country code, or World Bank regional/group code
+#'     where no ISO code is available.}
+#'   \item{country_name}{Character. Full country or territory name.}
 #'   \item{region}{Character. World Bank region name.}
-#'   \item{lending_instrument}{Character. Lending instrument type name.}
-#'   \item{lead_gp}{Character. Code of the lead Global Practice.}
-#'   \item{contrib_gp}{Character. Semicolon-separated list of contributing Global Practice codes.}
-#'   \item{ttl}{Character. Full name of the Task Team Leader.}
-#'   \item{commitment_amount}{Numeric. Total commitment amount in USD.}
+#'   \item{lending_instrument}{Character. Lending instrument code (e.g., \"IPF\", \"PforR\").}
+#'   \item{lead_gp}{Character. Code of the lead Global Practice (e.g., \"GOV\").}
+#'   \item{contrib_gp}{Character. Space-separated list of contributing Global Practice codes.
+#'     `NA` where no contributing practices are recorded.}
+#'   \item{ttl}{Character. Full name and role of the Task Team Leader.}
+#'   \item{commitment_amount}{Double. Total commitment amount in USD.}
 #' }
 #'
 #' @details
 #' Filtered to operations where:
 #' - `proj_status` is \"Active\" or \"Pipeline\"
-#' - The Governance GP (`GOV`) is either the lead or a contributing practice
-#' - `product_line_type` is Lending or Analytic and Advisory
-#' - `proj_approval_fy` is 2015 or later
+#' - The Governance GP (`GOV`) is either the lead (`lead_gp`) or a contributing practice (`contrib_gp`)
+#' - `product_line_type` is \"Lending Product\" or \"Analytic and Advisory Activities Product\"
 #'
-#' @source World Bank Data Explorer, Project Master V3 dataset:
+#' Country codes are sourced from the World Bank COUNTRY reference dataset and joined on
+#' `cntry_code`. Where an ISO 3-letter code is available it replaces the original 2-character
+#' World Bank code; otherwise the original code is retained.
+#'
+#' @source World Bank Data Explorer, Project Master V3 dataset, extracted 2026-04-21:
 #'   https://dataexplorer.worldbank.org/data/details?id=DS04442
 "wb_projects"
+
+#' World Bank Project Components
+#'
+#' A tibble of World Bank project components extracted from the Project
+#' Component List V3 dataset, with deleted and marked-for-deletion components
+#' removed.
+#'
+#' @format A tibble with 31,463 rows and 6 columns:
+#' \describe{
+#'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
+#'   \item{comp_id}{Character. Unique component identifier (e.g., \"DLV0151682\", \"COM0003869\").}
+#'   \item{comp_name}{Character. Full name/description of the component.}
+#'   \item{rating_code}{Character. Implementation progress rating code (e.g., \"S\" = Satisfactory,
+#'     \"MS\" = Moderately Satisfactory, \"MU\" = Moderately Unsatisfactory, \"U\" = Unsatisfactory,
+#'     \"HS\" = Highly Satisfactory). `NA` where no rating has been assigned.}
+#' }
+#'
+#' @details
+#' Components with `cmpnt_actn_code` of `"TO BE DELETED"` or `"Marked for Deletion"`
+#' are excluded (251 records removed). The remaining records include components with
+#' action codes `NA` (standard), `"Revised"`, and `"New"`.
+#'
+#' @source World Bank Data Explorer, Project Component List V3 dataset, extracted 2026-04-22:
+#'   https://dataexplorer.worldbank.org/data/details?id=DS04463
+"wb_project_components"
