@@ -49,5 +49,6 @@ po/*~
 rsconnect/
 
 # data
-data/
+data/input
+data/output
 .Rproj.user
