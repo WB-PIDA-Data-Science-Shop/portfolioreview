@@ -58,6 +58,7 @@ wb_projects |>
   filter(
     proj_status == "Active" 
   ) |> 
+  group_by(proj_approval_fy) |>
   summarise(
     mean(is.na(project_component_available)),
   )
