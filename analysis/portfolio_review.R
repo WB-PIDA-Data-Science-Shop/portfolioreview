@@ -29,6 +29,10 @@ wb_projects <- portfolioreview::wb_projects |>
   left_join(
     wb_project_components,
     by = c("proj_id")
+  ) |> 
+  mutate(
+    pad_available = if_else(is.na(pad_available), 0, pad_available),
+    project_component_available = if_else(is.na(project_component_available), 0, project_component_available)
   )
 
 # analyze ----------------------------------------------------------------
@@ -60,5 +64,5 @@ wb_projects |>
   ) |> 
   group_by(proj_approval_fy) |>
   summarise(
-    mean(is.na(project_component_available)),
+    mean(project_component_available == 1, na.rm = TRUE)
   )

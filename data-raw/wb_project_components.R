@@ -2,7 +2,6 @@
 library(dplyr)
 library(readr)
 
-
 # extracted from https://dataexplorer.worldbank.org/data/details?id=DS04463&t=Preview%20Data
 # on: 2026-04-22
 wb_project_components <- read_csv(

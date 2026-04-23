@@ -120,3 +120,52 @@
 #' @source World Bank Data Explorer, Project Component List V3 dataset, extracted 2026-04-22:
 #'   https://dataexplorer.worldbank.org/data/details?id=DS04463
 "wb_project_components"
+
+#' @title World Bank Country and Lending Groups
+#' @description A dataset containing the World Bank's standard country codes, country names, and their respective groups and group codes. This dataset is used to identify countries and their classifications in various World Bank reports and analyses.
+#' @format A data frame with 762 rows and 4 variables:
+#' \describe{
+#'   \item{\code{country_code}}{character World Bank country code}
+#'   \item{\code{country_name}}{character World Bank country name}
+#'   \item{\code{group}}{character Country group}
+#'   \item{\code{group_code}}{character Country group code}
+#'}
+#' @source https://ddh-openapi.worldbank.org/resources/DR0095333/download
+"wb_country_list"
+
+#' @title World Bank Country Group
+#' @description DATASET_DESCRIPTION
+#' @format A data frame with 18 rows and 2 variables:
+#' \describe{
+#'   \item{\code{group_name}}{character Group name}
+#'   \item{\code{group_category}}{character Group category (e.g., Economic, Region)}
+#'}
+#' @source https://ddh-openapi.worldbank.org/resources/DR0095333/download
+"wb_country_groups"
+
+#' World Bank Country Classifications by Region and Income
+#'
+#' A dataset containing the most recent country-level classifications published by the World Bank.
+#' Each country is assigned to both a regional grouping and an income group, following the World Bank's official taxonomy.
+#' This version corresponds to the World Bank classifications as of August 2025.
+#'
+#' @format A tibble with 264 rows and 4 variables:
+#' \describe{
+#'   \item{country_code}{Character. Three-letter World Bank country code.}
+#'   \item{country_name}{Character. World Bank country name.}
+#'   \item{region}{Character. World Bank regional classification
+#'                 (e.g., "South Asia", "Europe & Central Asia").}
+#'   \item{income_group}{Character. World Bank income group classification
+#'                       (e.g., "Low income", "Lower middle income",
+#'                       "Upper middle income", "High income").}
+#' }
+#'
+#' @details
+#' The dataset is based on World Bank country groupings and provides a
+#' standardized reference for linking countries to their region and
+#' income group. It is commonly used for aggregating indicators,
+#' stratifying analyses, and comparing outcomes across different
+#' development levels.
+#'
+#' @source World Bank Group — \url{https://ddh-openapi.worldbank.org/resources/DR0095333/download}
+"wb_income_and_region"
