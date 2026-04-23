@@ -37,7 +37,7 @@ wb_country_list <- read_xlsx(
   )
 
 # country income group and region
-wb_country_income_and_region <- read_xlsx(
+wb_income_and_region <- read_xlsx(
   wb_country_list_temp,
   sheet = "List of economies"
 ) |>
@@ -52,10 +52,6 @@ wb_country_income_and_region <- read_xlsx(
     country_code != "CUB" &
       country_code != "PRK"
   )
-
-wb_country_list_original <- read_rds(
-  here("data-raw", "input", "wb", "wb_country_list.rds")
-)
 
 # process -----------------------------------------------------------------
 # note that North America is not included in this list
@@ -116,13 +112,6 @@ wb_country_list <- wb_country_list |>
       "Viet Nam",
       country_name
     )
-  )
-
-# these are the countries that have had their income classification modified
-wb_country_list |>
-  distinct(country_code, group) |>
-  anti_join(
-    wb_country_list_original |> distinct(country_code, group_name) |> rename(group = group_name)
   )
 
 # write-out ---------------------------------------------------------------
