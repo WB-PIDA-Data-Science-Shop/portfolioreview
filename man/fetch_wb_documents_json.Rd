@@ -7,7 +7,7 @@
 fetch_wb_documents_json(
   base_url = "https://search.worldbank.org/api/v3/wds",
   fl = "id,count,abstracts,authr,docdt,origu,owner,projectid,theme,topic,docty",
-  strdate = "2010-01-01",
+  strdate = "2000-01-01",
   enddate = "2026-04-22",
   doc_type = NULL,
   os = 0,
