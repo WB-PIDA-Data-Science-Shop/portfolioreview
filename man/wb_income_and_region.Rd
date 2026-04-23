@@ -14,6 +14,7 @@ A tibble with 264 rows and 4 variables:
 \item{income_group}{Character. World Bank income group classification
 (e.g., "Low income", "Lower middle income",
 "Upper middle income", "High income").}
+\item{lending_category}{Character. World Bank lending category classification}
 }
 }
 \source{

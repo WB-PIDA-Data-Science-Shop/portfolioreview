@@ -45,7 +45,8 @@ wb_income_and_region <- read_xlsx(
     country_code = Code,
     country_name = Economy,
     region = Region,
-    income_group = `Income group`
+    income_group = `Income group`,
+    lending_category = `Lending category`
   ) |>
   # exclude non-WB member countries
   filter(

@@ -17,7 +17,7 @@ wb_project_components <- read_csv(
 wb_project_components <- wb_project_components |> 
   filter(
     !(cmpnt_actn_code %in% c("TO BE DELETED", "Marked for Deletion"))
-  ) |> 
+) |> 
   select(
     proj_id,
     comp_id = cmpnt_id,

@@ -12,10 +12,13 @@ devtools::load_all()
 # fetch documents --------------------------------------------------------
 total <- fetch_wb_documents_json(
   doc_type = c(
-        "Project Appraisal Document",
-        "Staff Appraisal Report"
-      )
-) |> 
+    "Project Appraisal Document",
+    "Staff Appraisal Report",
+    "Project Information Document",
+    "Program Information Document",
+    "Program Document"
+  )
+) |>
   pluck("total")
 
 skip_rows <- 0
@@ -27,8 +30,11 @@ while (skip_rows < total) {
     os = skip_rows,
     rows = n_rows,
     doc_type = c(
-        "Project Appraisal Document",
-        "Staff Appraisal Report"
+      "Project Appraisal Document",
+      "Staff Appraisal Report",
+      "Project Information Document",
+      "Program Information Document",
+      "Program Document"
     )
   )
 
@@ -68,7 +74,7 @@ wb_documents <- documents_tbl |>
 gov_unit <- wb_documents |>
   mutate(
     stringr::str_squish(owner)
-  ) |> 
+  ) |>
   distinct(owner) |>
   separate_rows(
     owner,
@@ -85,7 +91,7 @@ gov_unit <- wb_documents |>
   select(
     owner,
     owner_code
-  ) |> 
+  ) |>
   mutate(
     owner_label = "gov"
   )
@@ -95,18 +101,18 @@ wb_documents <- wb_documents |>
   left_join(
     gov_unit,
     by = "owner"
-  ) |> 
+  ) |>
   mutate(
     owner_label = if_else(
       is.na(owner_label),
       "other",
       owner_label
     )
-  ) |> 
+  ) |>
   # simplify dates
   mutate(
     doc_month = lubridate::round_date(
-      lubridate::ymd_hms(doc_date), 
+      lubridate::ymd_hms(doc_date),
       unit = "month"
     )
   )

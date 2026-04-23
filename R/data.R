@@ -158,6 +158,7 @@
 #'   \item{income_group}{Character. World Bank income group classification
 #'                       (e.g., "Low income", "Lower middle income",
 #'                       "Upper middle income", "High income").}
+#'   \item{lending_category}{Character. World Bank lending category classification}
 #' }
 #'
 #' @details

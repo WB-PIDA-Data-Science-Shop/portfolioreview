@@ -55,7 +55,8 @@ wb_projects <- wb_projects |>
     proj_status %in% c("Active", "Pipeline") &
       # only retain operations that are either GOV led or contributed to by GOV
       (str_detect(lead_gp, "GOV") |str_detect(contrib_gp, "GOV")) &
-      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
+      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product") &
+      proj_approval_fy > 0
   ) |>
   # fix country code
   left_join(
