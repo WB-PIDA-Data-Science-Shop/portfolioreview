@@ -205,3 +205,38 @@
 #'
 #' @source World Bank Group — \url{https://ddh-openapi.worldbank.org/resources/DR0095333/download}
 "wb_income_and_region"
+
+#' World Bank Project Themes
+#'
+#' A tibble of World Bank project-level theme assignments extracted from the
+#' Project Theme V3 dataset, joined with the Theme reference table to add
+#' theme hierarchy information.
+#'
+#' @format A tibble with 733,908 rows and 8 columns:
+#' \describe{
+#'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
+#'   \item{theme_code}{Character. Six-digit zero-padded theme code (e.g., \"000653\").}
+#'   \item{theme_name}{Character. Full name of the theme as assigned to the project
+#'     (e.g., \"FY17 - Science and Technology\").}
+#'   \item{theme_percentage}{Double. Percentage weight assigned to this theme for the
+#'     project (0–100). Values of 0 indicate unweighted theme assignments.}
+#'   \item{sort_order}{Double. Display sort order of the theme within the project.}
+#'   \item{vsn_code}{Character. Version code indicating whether the theme assignment
+#'     is \"F\" (Final) or \"I\" (Initial).}
+#'   \item{theme_level}{Character. Hierarchical level of the theme from the Theme
+#'     reference table: \"THEME_1\" (top-level), \"THEME_2\" (sub-theme), or
+#'     \"THEME_3\" (detailed sub-theme). `NA` for 371 unmatched codes.}
+#'   \item{parent_theme_name}{Character. Name of the parent theme one level up in
+#'     the hierarchy. `NA` for top-level themes and unmatched codes.}
+#' }
+#'
+#' @details
+#' Each row represents one theme assignment for a project. A single project
+#' (`proj_id`) typically has multiple theme assignments across different
+#' `theme_level` values. Theme level breakdown: THEME_1 (n = 175,205),
+#' THEME_2 (n = 245,714), THEME_3 (n = 312,618), unmatched (n = 371).
+#'
+#' @source World Bank Data Explorer, Project Theme V3 and Theme datasets,
+#'   extracted 2026-04-29:
+#'   \url{https://dataexplorer.worldbank.org/data/details?id=DS04463}
+"wb_project_themes"
