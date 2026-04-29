@@ -23,6 +23,12 @@ wb_project_components <- portfolioreview::wb_project_components |>
     project_component_available = 1
   )
 
+wb_project_indicators <- portfolioreview::wb_project_indicators |> 
+  distinct(proj_id) |>
+  mutate(
+    project_indicator_available = 1
+  )
+
 wb_country_ida <- portfolioreview::wb_country_list |> 
   distinct(country_code, country_name) |> 
   left_join(

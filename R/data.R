@@ -121,6 +121,41 @@
 #'   https://dataexplorer.worldbank.org/data/details?id=DS04463
 "wb_project_components"
 
+#' World Bank Project Result Indicators
+#'
+#' A tibble of World Bank project-level results indicators extracted from the
+#' Project Result Indicator Detail V2 dataset, containing baseline, progress,
+#' and target values for each reporting period.
+#'
+#' @format A tibble with 125,446 rows and 10 columns:
+#' \describe{
+#'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
+#'   \item{ind_code}{Character. Unique indicator identifier (e.g., \"IND0057605\").}
+#'   \item{ind_type_name}{Character. Indicator type: \"Intermediate Results Indicator\",
+#'     \"PDO Indicator\", or \"Global Engagement Indicator\".}
+#'   \item{ind_name}{Character. Full name/description of the indicator.}
+#'   \item{baseline_date}{Character. Date of the baseline measurement (YYYY-MM-DD).}
+#'   \item{baseline_val_text}{Character. Baseline value as a text string.}
+#'   \item{progress_date}{Character. Date of the progress measurement (YYYY-MM-DD).}
+#'   \item{progress_val_text}{Character. Progress value as a text string.}
+#'   \item{progress_cmnts_text}{Character. Narrative comments on progress. `NA` where
+#'     no comments are recorded.}
+#'   \item{rept_fy}{Character. Fiscal year of the Implementation Status Report (ISR)
+#'     in which this measurement was recorded.}
+#' }
+#'
+#' @details
+#' Each row represents one indicator measurement at a specific reporting date.
+#' A single indicator (`ind_code`) may appear multiple times across reporting
+#' periods (`rept_fy`). Indicator types break down as: Intermediate Results
+#' Indicators (IO, n = 85,437), PDO Indicators (PD, n = 39,222), and Global
+#' Engagement Indicators (GE, n = 787).
+#'
+#' @source World Bank Data Explorer, Project Result Indicator Detail V2 dataset,
+#'   extracted 2026-04-29:
+#'   https://dataexplorer.worldbank.org/data/details?id=DS04387
+"wb_project_indicators"
+
 #' @title World Bank Country and Lending Groups
 #' @description A dataset containing the World Bank's standard country codes, country names, and their respective groups and group codes. This dataset is used to identify countries and their classifications in various World Bank reports and analyses.
 #' @format A data frame with 762 rows and 4 variables:
