@@ -244,6 +244,10 @@ wb_projects_gov |>
 
 # write-out --------------------------------------------------------------
 wb_projects_gov |>
+  # filter only projects with a gov_theme tag
+  filter(
+    theme_pfm | theme_procurement | theme_public_admin | theme_es
+  ) |>
   mutate(
     file_name = region |>
       str_to_lower() |>
