@@ -80,10 +80,14 @@ portfolioreview::wb_projects |>
     wb_project_themes |> select(proj_id, project_theme_available),
     by = "proj_id"
   ) |> 
+  mutate(
+    across(ends_with("available"), ~ if_else(is.na(.x), 0, .x))
+  ) |> 
   group_by(lending_instrument) |> 
   summarise(
-    rate_indicator = mean(proj_id %in% wb_project_indicators$proj_id),
-    rate_theme = mean(proj_id %in% wb_project_themes$proj_id)
+    rate_indicator = mean(project_component_available),
+    rate_theme = mean(project_theme_available),
+    total = n()
   )
 
 # classify projects based on themes --------------------------------------
@@ -94,11 +98,11 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
       \(string) str_remove(string, "FY17 - ")
     )
   ) |> 
-  distinct(theme_name) |> 
+  distinct(proj_id, theme_name) |> 
   # classify topics with theme level 3
   filter(
     theme_name %in% c(
-      # Public Finance Management
+      # Public Financial Management
       "Public Expenditure Management",
       "Debt Management",
       "Domestic Revenue Administration",
@@ -159,221 +163,97 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
     )
   )
 
-
-wb_project_with_themes <- portfolioreview::wb_projects |> 
+wb_projects_gov_theme <- portfolioreview::wb_projects |>
   left_join(
-    portfolioreview::wb_project_themes |> 
-      group_by(proj_id) |> 
-      summarise(
-        theme_name = paste(theme_name, collapse = ";")
-      ),
+    gov_pc_themes |> select(proj_id, theme_category),
+    by = "proj_id",
+    relationship = "many-to-many"
+  ) |>
+  summarise(
+    theme_pfm            = any(theme_category == "Public Finance Management",                        na.rm = TRUE),
+    theme_procurement    = any(theme_category == "Public Procurement",                               na.rm = TRUE),
+    theme_public_admin   = any(theme_category == "Public Administration",                            na.rm = TRUE),
+    theme_es  = any(theme_category == "Institutional dimensions of social and environmental aspects", na.rm = TRUE),
+    .by = proj_id
+  )
+
+wb_projects_gov <- portfolioreview::wb_projects |> 
+  filter(
+    proj_approval_fy >= 2018 &
+      proj_status == "Active"
+  ) |> 
+  left_join(
+    wb_projects_gov_theme,
     by = "proj_id"
   )
 
-wb_project_with_themes |> 
-  group_by(proj_id)
+# classify procurement with components data, since procurement is a novel theme (post-2025)
+wb_projects_gov <- wb_projects_gov |> 
+  left_join(
+    portfolioreview::wb_project_components |> 
+      filter(
+        str_detect(comp_name, "procurement|Procurement")
+      ) |> 
+      distinct(proj_id) |> 
+      mutate(
+        component_procurement = 1
+      ),
+    by = "proj_id"
+  ) |> 
+  mutate(
+    theme_procurement = if_else(
+      !is.na(component_procurement) | theme_procurement,
+      TRUE,
+      FALSE
+    )
+  )
 
 # analyze ----------------------------------------------------------------
-# first stylized fact: PADs are missing for multiple active GOV operations,
-# especially in IPF
-wb_projects |> 
-  filter(
-    product_line_type == "Lending Product" &
-      lending_instrument %in% c("IPF", "PforR") &
-      proj_status == "Active" &
-      proj_approval_fy > 0
-  ) |>
-  group_by(lending_instrument, proj_approval_fy) |>
-  summarise(
-    count_pad = sum(pad_available),
-    rate_pad = mean(pad_available)
-  ) |> 
-  ungroup() |> 
-  ggplot(
-    aes(proj_approval_fy, rate_pad, color = lending_instrument)
-  ) +
-  geom_point() +
-  geom_line()
-
-# the ones that are missing project components are the PForR
-wb_projects |> 
+wb_projects_gov |> 
   filter(
     lending_instrument %in% c("IPF", "PforR") &
       proj_status == "Active" &
-      proj_approval_fy > 0
+      proj_approval_fy > 2018
   ) |> 
-  group_by(lending_instrument, proj_approval_fy) |> 
+  group_by(proj_approval_fy) |> 
   summarise(
-    rate_component = mean(project_component_available == 1),
-    rate_indicator = mean(project_indicator_available == 1)
+    rate_pfm = sum(theme_pfm),
+    rate_procurement = sum(theme_procurement),
+    rate_public_admin = sum(theme_public_admin),
+    rate_environmental_social = sum(theme_es)
   ) |> 
   ungroup() |> 
-  ggplot(
-    aes(proj_approval_fy, rate_indicator, color = lending_instrument)
-  ) +
-  geom_point() +
-  geom_line()
-
-categories <- list(
-  PFM = c(
-    "public finance", "pfm", "budget", "budgeting",
-    "fiscal", "fiscal management", "fiscal sustainability",
-    "treasury", "treasury single account", "tsa",
-    "expenditure", "public expenditure",
-    "tax", "taxation", "tax administration", "domestic revenue",
-    "revenue mobilization", "revenue administration",
-    "customs",
-    "public investment management", "\\bpim\\b",
-    "procurement", "public procurement", "e-procurement",
-    "debt management", "public debt",
-    "financial management information system", "\\bfmis\\b",
-    "integrated financial management", "\\bifmis\\b",
-    "medium-term expenditure", "mtef"
-  ),
-  
-  HRM = c(
-    "civil service", "civil servant",
-    "public service reform",
-    "government workforce",
-    "human resource management", "\\bhrm\\b",
-    "human resource information system", "\\bhrmis\\b",
-    "payroll", "pay and grading",
-    "wage bill",
-    "personnel management",
-    "staff management",
-    "merit[- ]based",
-    "performance management",
-    "public employment"
-  ),
-  
-  GovTech = c(
-    "govtech",
-    "digital government",
-    "e-?government", "egovernment",
-    "digital public", "digital transformation",
-    "government platform",
-    "digital platform",
-    "interoperability",
-    "information system",
-    "management information system", "\\bmis\\b",
-    "\\bict\\b",
-    "digital id", "digital identity",
-    "id system",
-    "open data",
-    "data governance",
-    "data exchange",
-    "digital service",
-    "online service",
-    "administrative digitization",
-    "core government system"
-  ),
-  
-  Anticorruption = c(
-    "anti[- ]corruption",
-    "corruption",
-    "integrity",
-    "transparency",
-    "accountability",
-    "asset declaration",
-    "beneficial ownership",
-    "financial disclosure",
-    "aml", "anti[- ]money laundering",
-    "cft",
-    "money laundering",
-    "illicit financial",
-    "fraud prevention",
-    "anticorruption commission",
-    "oversight institution"
-  ),
-  
-  Justice = c(
-    "justice",
-    "judicial",
-    "judiciary",
-    "court", "courts",
-    "legal system",
-    "rule of law",
-    "dispute resolution",
-    "commercial court",
-    "case management system",
-    "legal reform",
-    "legal services",
-    "insolvency",
-    "bankruptcy",
-    "access to justice"
-  )
-)
-
-# classify ipf projects --------------------------------------------------
-wb_gov_ipf <- wb_projects |> 
-  filter(
-    lending_instrument == "IPF" &
-      proj_status == "Active" &
-      proj_approval_fy > 0
-  )
-
-wb_gov_ipf_classification <- wb_ipf |> 
-  left_join(
-    portfolioreview::wb_project_components,
-    by = c("proj_id"),
-    relationship = "many-to-many"
-  ) |> 
-  mutate(
-    comp_name = str_to_lower(comp_name)
-  ) |> 
-  group_by(proj_id) |>
-  summarise(
-    project_classification_pfm            = any(str_detect(comp_name, paste(categories$PFM,            collapse = "|")), na.rm = TRUE),
-    project_classification_hrm            = any(str_detect(comp_name, paste(categories$HRM,            collapse = "|")), na.rm = TRUE),
-    project_classification_govtech        = any(str_detect(comp_name, paste(categories$GovTech,        collapse = "|")), na.rm = TRUE),
-    project_classification_anticorruption = any(str_detect(comp_name, paste(categories$Anticorruption, collapse = "|")), na.rm = TRUE),
-    project_classification_justice        = any(str_detect(comp_name, paste(categories$Justice,        collapse = "|")), na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  mutate(
-    project_classification_other = !project_classification_pfm &
-      !project_classification_hrm &
-      !project_classification_govtech &
-      !project_classification_anticorruption &
-      !project_classification_justice
-  )
-
-wb_gov_ipf_classified <- wb_gov_ipf |> 
-  left_join(
-    wb_gov_ipf_classification,
-    by = "proj_id"
-  )
-
-wb_gov_ipf_classified |> 
-  filter(
-    proj_approval_fy > 2015
-  ) |>
-  group_by(proj_approval_fy, region) |> 
-  summarise(
-    total_pfm = sum(project_classification_pfm),
-    total_hrm = sum(project_classification_hrm),
-    total_govtech = sum(project_classification_govtech),
-    total_anticorruption = sum(project_classification_anticorruption),
-    total_justice = sum(project_classification_justice),
-    total_other = sum(project_classification_other)
-  ) |> 
-  ungroup() |>
   tidyr::pivot_longer(
-    cols = starts_with("total_"),
-    names_to = "classification",
-    values_to = "total"
+    cols = starts_with("rate_"),
+    names_to = "theme_category",
+    values_to = "rate"
   ) |>
   # remove "rate_" prefix
   mutate(
-    classification = str_remove(classification, "total_")
-  ) |>
+    theme_category = str_remove(theme_category, "rate_")
+  ) |> 
   ggplot(
-    aes(proj_approval_fy, rate, color = classification)
+    aes(proj_approval_fy, rate, color = theme_category)
   ) +
   geom_point() +
   geom_line() +
-  facet_wrap(~region) +
   scale_color_solarized() +
   theme(
     legend.position = "bottom"
   )
+
+# write-out --------------------------------------------------------------
+wb_projects_gov |>
+  mutate(
+    file_name = region |>
+      str_to_lower() |>
+      str_replace_all("[^a-z0-9]+", "_") |>
+      str_remove("_$")
+  ) |>
+  group_by(file_name) |>
+  group_walk(\(data, key) {
+    readr::write_csv(
+      data |> select(-file_name),
+      here::here("data", "output", "wb_projects_gov", paste0("gov_projects_", key$file_name, ".csv"))
+    )
+  }, .keep = TRUE)
