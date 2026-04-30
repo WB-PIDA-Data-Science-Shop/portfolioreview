@@ -188,6 +188,14 @@ wb_projects_gov <- portfolioreview::wb_projects |>
       proj_status == "Active" &
       lead_gp == "GOV"
   ) |> 
+  # only IDA and blend countries
+  left_join(
+    portfolioreview::wb_income_and_region |> select(country_code, lending_category),
+    by = "country_code"
+  ) |> 
+  filter(
+    lending_category %in% c("IDA", "Blend")
+  ) |>
   left_join(
     wb_projects_gov_theme,
     by = "proj_id"
@@ -212,15 +220,11 @@ wb_projects_gov <- wb_projects_gov |>
       TRUE,
       FALSE
     )
-  )
+  ) |> 
+  select(-component_procurement)
 
 # analyze ----------------------------------------------------------------
 wb_projects_gov |> 
-  filter(
-    lending_instrument %in% c("IPF", "PforR") &
-      proj_status == "Active" &
-      proj_approval_fy > 2018
-  ) |> 
   group_by(proj_approval_fy) |> 
   summarise(
     rate_pfm = sum(theme_pfm),
@@ -249,16 +253,22 @@ wb_projects_gov |>
   )
 
 # write-out --------------------------------------------------------------
+region_acronyms <- c(
+  "East Asia and Pacific"                            = "eap",
+  "Europe and Central Asia"                          = "eca",
+  "Latin America and Caribbean"                      = "lac",
+  "Middle East and North Africa"                     = "mena",
+  "South Asia"                                       = "sar",
+  "Sub-Saharan Africa"                               = "afr",
+  "Eastern and Southern Africa"                      = "afe",
+  "Western and Central Africa"                       = "afw",
+  "Middle East, North Africa, Afghanistan and Pakistan" = "menaap"
+)
+
 wb_projects_gov |>
-  # filter only projects with a gov_theme tag
-  filter(
-    theme_pfm | theme_procurement | theme_public_admin | theme_es
-  ) |>
+  filter(theme_pfm | theme_procurement | theme_public_admin | theme_es) |>
   mutate(
-    file_name = region |>
-      str_to_lower() |>
-      str_replace_all("[^a-z0-9]+", "_") |>
-      str_remove("_$")
+    file_name = region_acronyms[region]
   ) |>
   group_by(file_name) |>
   group_walk(\(data, key) {
