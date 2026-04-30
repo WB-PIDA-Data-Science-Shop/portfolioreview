@@ -41,9 +41,7 @@ wb_project_themes <- wb_project_themes_raw |>
     proj_id,
     theme_code,
     theme_name,
-    theme_percentage,
-    sort_order = sort_order_nbr,
-    vsn_code
+    theme_percentage
   ) |>
   left_join(theme_ref, by = "theme_code")
 

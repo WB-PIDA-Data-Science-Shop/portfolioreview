@@ -8,6 +8,8 @@ theme_set(
   theme_minimal()
 )
 
+devtools::load_all()
+
 # read-in data -----------------------------------------------------------
 # investigate why projects have more than a PAD
 wb_documents <- portfolioreview::wb_documents |> 
@@ -29,6 +31,12 @@ wb_project_indicators <- portfolioreview::wb_project_indicators |>
   distinct(proj_id) |>
   mutate(
     project_indicator_available = 1
+  )
+
+wb_project_themes <- portfolioreview::wb_project_themes |> 
+  distinct(proj_id) |>
+  mutate(
+    project_theme_available = 1
   )
 
 wb_country_ida <- portfolioreview::wb_country_list |> 
@@ -53,17 +61,117 @@ wb_projects_ida <- portfolioreview::wb_projects |>
   inner_join(
     wb_country_ida,
     by = c("country_code")
+  )
+
+# check coverage
+portfolioreview::wb_projects |> 
+  filter(
+    proj_status == "Active"
+  ) |> 
+  left_join(
+    wb_project_components |> select(proj_id, project_component_available),
+    by = "proj_id"
   ) |>
+  left_join(
+    wb_project_indicators |> select(proj_id, project_indicator_available),
+    by = "proj_id"
+  ) |> 
+  left_join(
+    wb_project_themes |> select(proj_id, project_theme_available),
+    by = "proj_id"
+  ) |> 
+  group_by(lending_instrument) |> 
+  summarise(
+    rate_indicator = mean(proj_id %in% wb_project_indicators$proj_id),
+    rate_theme = mean(proj_id %in% wb_project_themes$proj_id)
+  )
+
+# classify projects based on themes --------------------------------------
+gov_pc_themes <- portfolioreview::wb_project_themes |> 
   mutate(
-    pad_available = if_else(is.na(pad_available), 0, pad_available),
-    project_component_available = if_else(
-      is.na(project_component_available), 0, project_component_available
-    ),
-    project_indicator_available = if_else(
-      is.na(project_indicator_available), 0, project_indicator_available
+    across(
+      c(theme_name, parent_theme_name),
+      \(string) str_remove(string, "FY17 - ")
+    )
+  ) |> 
+  distinct(theme_name) |> 
+  # classify topics with theme level 3
+  filter(
+    theme_name %in% c(
+      # Public Finance Management
+      "Public Expenditure Management",
+      "Debt Management",
+      "Domestic Revenue Administration",
+      "Budget and Treasury Management",
+      "Public Assets and Investment Management",
+      "Government Financial Reporting and Balance Sheets",
+      "Oversight, Accountability, and Supreme Audit Institutions",
+      # Public Procurement
+      "Procurement",
+      # Public Administration
+      "Administrative and Civil Service Reform",
+      "Govtech",
+      "E-Government, incl. e-services",
+      "Transparency, Accountability and Good Governance",
+      # Institutional dimensions of social and environmental aspects
+      "Adaptation",
+      "Mitigation",
+      "Disaster Risk Management Governance",
+      "Citizen Engagement and Social Accountability Policy, Programs, and Capacity Building",
+      "Community and Local Infrastructure and Service Delivery",
+      "Community Livelihoods and Local Economic Development",
+      "Community and Local Governance"
+    )
+  ) |> 
+  # classify topics into broader categories
+  mutate(
+    theme_category = case_when(
+      theme_name %in% c(
+        "Public Expenditure Management",
+        "Debt Management",
+        "Domestic Revenue Administration",
+        "Budget and Treasury Management",
+        "Public Assets and Investment Management",
+        "Government Financial Reporting and Balance Sheets",
+        "Oversight, Accountability, and Supreme Audit Institutions"
+      ) ~ "Public Finance Management",
+
+      theme_name == "Procurement" ~ "Public Procurement",
+      
+      theme_name %in% c(
+        "Administrative and Civil Service Reform",
+        "Govtech",
+        "E-Government, incl. e-services",
+        "Transparency, Accountability and Good Governance"
+      ) ~ "Public Administration",
+      
+      theme_name %in% c(
+        "Adaptation",
+        "Mitigation",
+        "Disaster Risk Management Governance",
+        "Citizen Engagement and Social Accountability Policy, Programs, and Capacity Building",
+        "Community and Local Infrastructure and Service Delivery",
+        "Community Livelihoods and Local Economic Development",
+        "Community and Local Governance"
+      ) ~ "Institutional dimensions of social and environmental aspects",
+      
+      TRUE ~ NA_character_
     )
   )
 
+
+wb_project_with_themes <- portfolioreview::wb_projects |> 
+  left_join(
+    portfolioreview::wb_project_themes |> 
+      group_by(proj_id) |> 
+      summarise(
+        theme_name = paste(theme_name, collapse = ";")
+      ),
+    by = "proj_id"
+  )
+
+wb_project_with_themes |> 
+  group_by(proj_id)
 
 # analyze ----------------------------------------------------------------
 # first stylized fact: PADs are missing for multiple active GOV operations,
@@ -269,7 +377,3 @@ wb_gov_ipf_classified |>
   theme(
     legend.position = "bottom"
   )
-
-# classify projects based on themes --------------------------------------
-
-
