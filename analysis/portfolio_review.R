@@ -164,6 +164,11 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
   )
 
 wb_projects_gov_theme <- portfolioreview::wb_projects |>
+  filter(
+    proj_status == "Active" &
+      proj_approval_fy > 2018 &
+      lead_gp == "GOV"
+  ) |> 
   left_join(
     gov_pc_themes |> select(proj_id, theme_category),
     by = "proj_id",
@@ -180,7 +185,8 @@ wb_projects_gov_theme <- portfolioreview::wb_projects |>
 wb_projects_gov <- portfolioreview::wb_projects |> 
   filter(
     proj_approval_fy >= 2018 &
-      proj_status == "Active"
+      proj_status == "Active" &
+      lead_gp == "GOV"
   ) |> 
   left_join(
     wb_projects_gov_theme,
