@@ -1,8 +1,7 @@
+## code to prepare `wb_projects_gov` dataset goes here
 # set-up -----------------------------------------------------------------
 library(dplyr)
-library(ggplot2)
 library(stringr)
-library(ggthemes)
 
 theme_set(
   theme_minimal()
@@ -178,7 +177,7 @@ wb_projects_gov_theme <- portfolioreview::wb_projects |>
     theme_pfm            = any(theme_category == "Public Finance Management",                        na.rm = TRUE),
     theme_procurement    = any(theme_category == "Public Procurement",                               na.rm = TRUE),
     theme_public_admin   = any(theme_category == "Public Administration",                            na.rm = TRUE),
-    theme_es  = any(theme_category == "Institutional dimensions of social and environmental aspects", na.rm = TRUE),
+    theme_env_social  = any(theme_category == "Institutional dimensions of social and environmental aspects", na.rm = TRUE),
     .by = proj_id
   )
 
@@ -223,35 +222,6 @@ wb_projects_gov <- wb_projects_gov |>
   ) |> 
   select(-component_procurement)
 
-# analyze ----------------------------------------------------------------
-wb_projects_gov |> 
-  group_by(proj_approval_fy) |> 
-  summarise(
-    rate_pfm = sum(theme_pfm),
-    rate_procurement = sum(theme_procurement),
-    rate_public_admin = sum(theme_public_admin),
-    rate_environmental_social = sum(theme_es)
-  ) |> 
-  ungroup() |> 
-  tidyr::pivot_longer(
-    cols = starts_with("rate_"),
-    names_to = "theme_category",
-    values_to = "rate"
-  ) |>
-  # remove "rate_" prefix
-  mutate(
-    theme_category = str_remove(theme_category, "rate_")
-  ) |> 
-  ggplot(
-    aes(proj_approval_fy, rate, color = theme_category)
-  ) +
-  geom_point() +
-  geom_line() +
-  scale_color_solarized() +
-  theme(
-    legend.position = "bottom"
-  )
-
 # write-out --------------------------------------------------------------
 region_acronyms <- c(
   "East Asia and Pacific"                            = "eap",
@@ -265,22 +235,7 @@ region_acronyms <- c(
   "Middle East, North Africa, Afghanistan and Pakistan" = "menaap"
 )
 
-wb_projects_gov_out <- wb_projects_gov |>
-  filter(theme_pfm | theme_procurement | theme_public_admin | theme_es)
+wb_projects_gov <- wb_projects_gov |>
+  filter(theme_pfm | theme_procurement | theme_public_admin | theme_env_social)
 
-wb_projects_gov_out |>
-  write_csv(
-    here::here("inst", "extdata", "wb_projects_gov.csv ")
-  )
-
-wb_projects_gov_out |>
-  mutate(
-    file_name = region_acronyms[region]
-  ) |>
-  group_by(file_name) |>
-  group_walk(\(data, key) {
-    readr::write_csv(
-      data |> select(-file_name),
-      here::here("inst", "extdata", "wb_projects_gov", paste0("gov_projects_", key$file_name, ".csv"))
-    )
-  }, .keep = TRUE)
+usethis::use_data(wb_projects_gov, overwrite = TRUE)

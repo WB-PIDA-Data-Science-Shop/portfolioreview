@@ -240,3 +240,61 @@
 #'   extracted 2026-04-29:
 #'   \url{https://dataexplorer.worldbank.org/data/details?id=DS04463}
 "wb_project_themes"
+
+#' World Bank Governance Portfolio: Active IDA/Blend Projects (FY2018–present)
+#'
+#' A tibble of active World Bank lending operations led by the Governance (GOV)
+#' Global Practice in IDA and Blend countries, approved in FY2018 or later,
+#' with theme classification flags derived from project themes and components.
+#'
+#' @format A tibble with one row per project and 22 columns:
+#' \describe{
+#'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
+#'   \item{proj_name}{Character. Display name of the project.}
+#'   \item{proj_status}{Character. Current project status: \"Active\".}
+#'   \item{pdo}{Character. Project Development Objective description.}
+#'   \item{proj_approval_fy}{Double. Fiscal year in which the project was approved.}
+#'   \item{proj_url}{Character. URL to the project page on the World Bank Operations Portal.}
+#'   \item{product_line_type}{Character. Product line type (e.g., \"Lending Product\").}
+#'   \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}
+#'   \item{country_code}{Character. ISO 3-letter country code.}
+#'   \item{country_name}{Character. Full country or territory name.}
+#'   \item{region}{Character. World Bank region name.}
+#'   \item{lending_instrument}{Character. Lending instrument code (e.g., \"IPF\", \"PforR\").}
+#'   \item{lead_gp}{Character. Code of the lead Global Practice: always \"GOV\" in this dataset.}
+#'   \item{contrib_gp}{Character. Space-separated list of contributing Global Practice codes.
+#'     `NA` where no contributing practices are recorded.}
+#'   \item{ttl}{Character. Full name and role of the Task Team Leader.}
+#'   \item{commitment_amount}{Double. Total commitment amount in USD.}
+#'   \item{lending_category}{Character. World Bank lending category: \"IDA\" or \"Blend\".}
+#'   \item{theme_pfm}{Logical. `TRUE` if the project is associated with Public Financial
+#'     Management themes (e.g., budget management, debt, domestic revenue, audit).}
+#'   \item{theme_procurement}{Logical. `TRUE` if the project is associated with Public
+#'     Procurement, either via a project theme assignment or a procurement-related
+#'     component name.}
+#'   \item{theme_public_admin}{Logical. `TRUE` if the project is associated with Public
+#'     Administration themes (e.g., civil service reform, GovTech, e-government,
+#'     transparency and accountability).}
+#'   \item{theme_env_social}{Logical. `TRUE` if the project is associated with Institutional
+#'     dimensions of social and environmental aspects (e.g., adaptation, disaster risk
+#'     governance, citizen engagement, community governance).}
+#' }
+#'
+#' @details
+#' Filtered to operations where:
+#' - `proj_status` is \"Active\"
+#' - `lead_gp` is \"GOV\"
+#' - `proj_approval_fy` is 2018 or later
+#' - `lending_category` is \"IDA\" or \"Blend\" (joined from `wb_income_and_region`)
+#' - At least one of `theme_pfm`, `theme_procurement`, `theme_public_admin`,
+#'   or `theme_es` is `TRUE`
+#'
+#' Theme flags are derived from `wb_project_themes` via `gov_pc_themes`, a filtered
+#' and classified subset of THEME_3-level World Bank themes. `theme_procurement` is
+#' supplemented by component-level keyword matching from `wb_project_components`,
+#' since Procurement became a standalone theme only post-2025.
+#'
+#' @source Derived from \code{\link{wb_projects}}, \code{\link{wb_project_themes}},
+#'   \code{\link{wb_project_components}}, and \code{\link{wb_income_and_region}}.
+#'   See \code{data-raw/wb_projects_gov.R} for full preparation script.
+"wb_projects_gov"
