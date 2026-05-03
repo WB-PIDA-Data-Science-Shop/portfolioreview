@@ -9,7 +9,7 @@ library(here)
 # on: 2026-04-21
 wb_projects <- read_csv(
   here(
-    "data", "input", "wb-data-explorer",
+    "data-raw", "input", "wb-data-explorer",
     "PROJECT_MASTER_V3_04_21_2026.csv"
   ),
   skip = 4
@@ -20,7 +20,7 @@ wb_projects <- read_csv(
 # on: 2026-04-22
 country_list <- read_csv(
   here(
-    "data", "input", "wb-data-explorer",
+    "data-raw", "input", "wb-data-explorer",
     "COUNTRY_04_22_2026.csv"
   ),
   skip = 4

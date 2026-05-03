@@ -6,7 +6,7 @@ library(readr)
 # on: 2026-04-22
 wb_project_components <- read_csv(
   here(
-    "data", "input", "wb-data-explorer",
+    "data-raw", "input", "wb-data-explorer",
     "PROJECT_COMPONENT_LIST_V3_04_22_2026.csv"
 ),
   skip = 4

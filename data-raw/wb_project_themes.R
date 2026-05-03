@@ -7,7 +7,7 @@ library(here)
 # on: 2026-04-29
 wb_project_themes_raw <- read_csv(
   here(
-    "data", "input", "wb-data-explorer",
+    "data-raw", "input", "wb-data-explorer",
     "PROJECT_THEME_V3_04_29_2026.csv"
   ),
   skip = 4
@@ -18,7 +18,7 @@ wb_project_themes_raw <- read_csv(
 # THEME_CDE is numeric; zero-pad to 6 chars to match PROJECT_THEME_V3 codes
 theme_ref <- read_csv(
   here(
-    "data", "input", "wb-data-explorer",
+    "data-raw", "input", "wb-data-explorer",
     "THEME_04_29_2026.csv"
   ),
   skip = 4

@@ -1,0 +1,233 @@
+---
+title: "Governance Portfolio Review"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 12,
+  fig.height = 10,
+  dpi = 300
+)
+
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+library(ggthemes)
+
+devtools::load_all()
+
+theme_set(theme_minimal())
+
+wb_projects_gov <- portfolioreview::wb_projects_gov
+
+wb_lending_gov <- wb_projects_gov |>
+  filter(product_line_type == "Lending Product")
+
+wb_asa_gov <- wb_projects_gov |>
+  filter(product_line_type == "Analytic and Advisory Activities Product")
+
+theme_labels <- function(x) {
+  case_match(
+    x,
+    "pfm"                  ~ "Public Financial Management",
+    "procurement"          ~ "Public Procurement",
+    "public_admin"         ~ "Public Administration",
+    "environmental_social" ~ "Environmental & Social"
+  )
+}
+```
+
+## Overview
+
+The dataset covers active World Bank operations led by the Governance Global Practice (GOV) in IDA-eligible and Blend countries, approved between FY2019 and FY2026. Data were extracted from the [World Bank Data Explorer](https://dataexplorer.worldbank.org/) between April 21–29, 2026. The dataset includes both lending operations and analytic and advisory activities (ASAs), with a thematic focus on governance-related issues. 
+
+The analysis below provides an overview of lending and ASA trends over time, as well as a thematic breakdown of projects in the portfolio. It also provides regional comparisons in the lending and ASA portoflios.
+
+## Lending trends
+
+```{r lending-trends}
+wb_lending_gov |>
+  summarise(rate = n_distinct(proj_id), .by = proj_approval_fy) |>
+  ggplot(aes(proj_approval_fy, rate)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  )
+```
+
+## Lending trends by region
+
+```{r lending-trends-region}
+wb_lending_gov |>
+  summarise(rate = n_distinct(proj_id), .by = c(proj_approval_fy, region)) |>
+  ggplot(aes(proj_approval_fy, rate, color = region)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  scale_color_solarized() +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  ) +
+  facet_wrap(
+    vars(region),
+    ncol = 2
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## ASA trends
+
+```{r asa-trends}
+wb_asa_gov |>
+  summarise(rate = n_distinct(proj_id), .by = proj_approval_fy) |>
+  ggplot(aes(proj_approval_fy, rate)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  )
+```
+
+## ASA trends by region
+
+```{r asa-trends-region}
+wb_asa_gov |>
+  summarise(rate = n_distinct(proj_id), .by = c(proj_approval_fy, region)) |>
+  ggplot(aes(proj_approval_fy, rate, color = region)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  scale_color_solarized() +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## Thematic breakdown over time
+
+```{r theme-trends}
+wb_lending_gov |>
+  summarise(
+    rate_pfm                  = sum(theme_pfm),
+    rate_procurement          = sum(theme_procurement),
+    rate_public_admin         = sum(theme_public_admin),
+    rate_environmental_social = sum(theme_env_social),
+    .by = proj_approval_fy
+  ) |>
+  pivot_longer(
+    cols      = starts_with("rate_"),
+    names_to  = "theme_category",
+    values_to = "rate"
+  ) |>
+  mutate(theme_category = theme_labels(str_remove(theme_category, "rate_"))) |>
+  ggplot(aes(proj_approval_fy, rate, color = theme_category)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  scale_color_solarized() +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## Thematic breakdown over time by region
+
+```{r theme-trends-region}
+wb_lending_gov |>
+  summarise(
+    rate_pfm                  = sum(theme_pfm),
+    rate_procurement          = sum(theme_procurement),
+    rate_public_admin         = sum(theme_public_admin),
+    rate_environmental_social = sum(theme_env_social),
+    .by = c(proj_approval_fy, region)
+  ) |>
+  pivot_longer(
+    cols      = starts_with("rate_"),
+    names_to  = "theme_category",
+    values_to = "rate"
+  ) |>
+  mutate(theme_category = theme_labels(str_remove(theme_category, "rate_"))) |>
+  ggplot(aes(proj_approval_fy, rate, color = theme_category)) +
+  geom_point(size = 5, alpha = 0.7) +
+  geom_line(linewidth = 1.5, alpha = 0.7) +
+  scale_color_solarized() +
+  facet_wrap(vars(region), ncol = 2) +
+  labs(
+    x = "Fiscal year of project approval",
+    y = "Number of projects"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+## Thematic breakdown in FY2026
+
+```{r theme-breakdown-2026}
+wb_lending_gov |>
+  filter(proj_approval_fy == 2026) |>
+  summarise(
+    rate_pfm                  = sum(theme_pfm),
+    rate_procurement          = sum(theme_procurement),
+    rate_public_admin         = sum(theme_public_admin),
+    rate_environmental_social = sum(theme_env_social)
+  ) |>
+  pivot_longer(
+    cols      = starts_with("rate_"),
+    names_to  = "theme_category",
+    values_to = "rate"
+  ) |>
+  mutate(theme_category = theme_labels(str_remove(theme_category, "rate_"))) |>
+  ggplot(aes(theme_category, rate, fill = theme_category)) +
+  geom_col(alpha = 0.7) +
+  scale_fill_solarized() +
+  labs(
+    x = "Theme",
+    y = "Number of projects"
+  ) +
+  theme(
+    legend.position = "bottom",
+    axis.text.x     = element_text(angle = 30, hjust = 1)
+  )
+```
+
+## Thematic breakdown in FY2026 by region
+
+```{r theme-breakdown-2026-region}
+wb_lending_gov |>
+  filter(proj_approval_fy == 2026) |>
+  summarise(
+    rate_pfm                  = sum(theme_pfm),
+    rate_procurement          = sum(theme_procurement),
+    rate_public_admin         = sum(theme_public_admin),
+    rate_environmental_social = sum(theme_env_social),
+    .by = region
+  ) |>
+  pivot_longer(
+    cols      = starts_with("rate_"),
+    names_to  = "theme_category",
+    values_to = "rate"
+  ) |>
+  mutate(theme_category = theme_labels(str_remove(theme_category, "rate_"))) |>
+  ggplot(aes(theme_category, rate, fill = theme_category)) +
+  geom_col(alpha = 0.7) +
+  scale_fill_solarized() +
+  facet_wrap(vars(region), ncol = 2) +
+  labs(
+    x = "Theme",
+    y = "Number of projects"
+  ) +
+  theme(legend.position = "none")
+```

@@ -2,10 +2,7 @@
 # set-up -----------------------------------------------------------------
 library(dplyr)
 library(stringr)
-
-theme_set(
-  theme_minimal()
-)
+library(here)
 
 devtools::load_all()
 
@@ -188,12 +185,9 @@ wb_projects_gov <- portfolioreview::wb_projects |>
       lead_gp == "GOV"
   ) |> 
   # only IDA and blend countries
-  left_join(
-    portfolioreview::wb_income_and_region |> select(country_code, lending_category),
-    by = "country_code"
-  ) |> 
-  filter(
-    lending_category %in% c("IDA", "Blend")
+  inner_join(
+    wb_country_ida,
+    by = c("country_code")
   ) |>
   left_join(
     wb_projects_gov_theme,
@@ -232,10 +226,32 @@ region_acronyms <- c(
   "Sub-Saharan Africa"                               = "afr",
   "Eastern and Southern Africa"                      = "afe",
   "Western and Central Africa"                       = "afw",
-  "Middle East, North Africa, Afghanistan and Pakistan" = "menaap"
+  "Middle East, North Africa, Afghanistan, and Pakistan" = "mena"
 )
 
+# last filters
 wb_projects_gov <- wb_projects_gov |>
-  filter(theme_pfm | theme_procurement | theme_public_admin | theme_env_social)
+  filter(
+    theme_pfm | theme_procurement | theme_public_admin | theme_env_social
+  ) |> 
+  arrange(
+    region, country_name, product_line_type, lending_instrument, proj_approval_fy
+  )
+
+# write out regional subsets to inst extdata in csv format and using group_walk
+wb_projects_gov |> 
+  mutate(
+    region_acronym = recode(region, !!!region_acronyms)
+  ) |> 
+  group_by(region_acronym) |> 
+  group_walk(
+    ~ readr::write_csv(
+      .x,
+      here::here(
+        "inst", "extdata",
+        paste0("wb_projects_gov_", .y$region_acronym, ".csv")
+      )
+    )
+  )
 
 usethis::use_data(wb_projects_gov, overwrite = TRUE)
