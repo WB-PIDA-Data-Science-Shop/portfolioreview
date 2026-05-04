@@ -199,7 +199,7 @@ wb_projects_gov_out |>
   )
 
 # write out regional subsets to inst extdata in csv format and using group_walk
-wb_projects_gov |> 
+wb_projects_gov_out |> 
   mutate(
     region_acronym = recode(region, !!!region_acronyms)
   ) |> 

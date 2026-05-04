@@ -26,6 +26,7 @@ where no ISO code is available.}
 \code{NA} where no contributing practices are recorded.}
 \item{ttl}{Character. Full name and role of the Task Team Leader.}
 \item{commitment_amount}{Double. Total commitment amount in USD.}
+\item{agreement_type}{Character. Agreement type code (e.g., \"RETF\", \"IDA\").}
 }
 }
 \source{
