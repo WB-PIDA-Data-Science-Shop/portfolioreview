@@ -1,40 +1,15 @@
 ## code to prepare `wb_projects_gov` dataset goes here
+# #ave a list of projects that we drop because we classify them 
+# as not contributing (e.g., HRM or public procurement)
 # set-up -----------------------------------------------------------------
 library(dplyr)
 library(stringr)
+library(readr)
 library(here)
 
 devtools::load_all()
 
 # read-in data -----------------------------------------------------------
-# investigate why projects have more than a PAD
-wb_documents <- portfolioreview::wb_documents |> 
-  distinct(proj_id, .keep_all = TRUE) |>
-  transmute(
-    proj_id,
-    doc_month,
-    owner_label,
-    pad_available = 1
-  )
-
-wb_project_components <- portfolioreview::wb_project_components |> 
-  distinct(proj_id) |>
-  mutate(
-    project_component_available = 1
-  )
-
-wb_project_indicators <- portfolioreview::wb_project_indicators |> 
-  distinct(proj_id) |>
-  mutate(
-    project_indicator_available = 1
-  )
-
-wb_project_themes <- portfolioreview::wb_project_themes |> 
-  distinct(proj_id) |>
-  mutate(
-    project_theme_available = 1
-  )
-
 wb_country_ida <- portfolioreview::wb_country_list |> 
   distinct(country_code, country_name) |> 
   left_join(
@@ -46,44 +21,25 @@ wb_country_ida <- portfolioreview::wb_country_list |>
   ) |> 
   select(country_code, lending_category)
 
-# note: 72.2 percent of lending projects have components available
-wb_projects_ida <- portfolioreview::wb_projects |> 
-  # only count active projects
+projects_ida_20 <- read_csv(
+  here("data-raw", "input", "ida-20", "consolidated_project_codes.csv")
+)
+
+wb_projects_gov <- portfolioreview::wb_projects |> 
   filter(
-    proj_status == "Active"
+      proj_status == "Active" &
+      lead_gp == "GOV" &
+      (agreement_type != "RETF" | is.na(agreement_type))
   ) |> 
-  # subset to IDA countries
-  # worried about regional projects that include multiple countries, some of which are IDA
+  # only IDA and blend countries
   inner_join(
     wb_country_ida,
     by = c("country_code")
-  )
-
-# check coverage
-portfolioreview::wb_projects |> 
-  filter(
-    proj_status == "Active"
-  ) |> 
-  left_join(
-    wb_project_components |> select(proj_id, project_component_available),
-    by = "proj_id"
   ) |>
-  left_join(
-    wb_project_indicators |> select(proj_id, project_indicator_available),
-    by = "proj_id"
-  ) |> 
-  left_join(
-    wb_project_themes |> select(proj_id, project_theme_available),
-    by = "proj_id"
-  ) |> 
-  mutate(
-    across(ends_with("available"), ~ if_else(is.na(.x), 0, .x))
-  ) |> 
-  group_by(lending_instrument) |> 
-  summarise(
-    rate_indicator = mean(project_component_available),
-    rate_theme = mean(project_theme_available),
-    total = n()
+  # exclude ida-20 projects that were already approved in the previous cycle
+  anti_join(
+    projects_ida_20,
+    by = c("proj_id" = "Project ID")
   )
 
 # classify projects based on themes --------------------------------------
@@ -162,7 +118,6 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
 wb_projects_gov_theme <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Active" &
-      proj_approval_fy > 2018 &
       lead_gp == "GOV"
   ) |> 
   left_join(
@@ -178,24 +133,12 @@ wb_projects_gov_theme <- portfolioreview::wb_projects |>
     .by = proj_id
   )
 
-wb_projects_gov <- portfolioreview::wb_projects |> 
-  filter(
-    proj_approval_fy >= 2018 &
-      proj_status == "Active" &
-      lead_gp == "GOV"
-  ) |> 
-  # only IDA and blend countries
-  inner_join(
-    wb_country_ida,
-    by = c("country_code")
-  ) |>
+# classify procurement with components data, since procurement is a novel theme (post-2025)
+wb_projects_gov <- wb_projects_gov |> 
   left_join(
     wb_projects_gov_theme,
     by = "proj_id"
-  )
-
-# classify procurement with components data, since procurement is a novel theme (post-2025)
-wb_projects_gov <- wb_projects_gov |> 
+  ) |>
   left_join(
     portfolioreview::wb_project_components |> 
       filter(
@@ -229,13 +172,30 @@ region_acronyms <- c(
   "Middle East, North Africa, Afghanistan, and Pakistan" = "mena"
 )
 
-# last filters
-wb_projects_gov <- wb_projects_gov |>
-  filter(
-    theme_pfm | theme_procurement | theme_public_admin | theme_env_social
-  ) |> 
-  arrange(
-    region, country_name, product_line_type, lending_instrument, proj_approval_fy
+# prune
+wb_projects_gov_out <- wb_projects_gov |> 
+  select(
+    proj_id,
+    proj_name,
+    pdo,
+    region,
+    country_name,
+    proj_approval_fy,
+    proj_url,
+    product_line_type,
+    lending_instrument,
+    lead_gp,
+    ttl,
+    agreement_type,
+    commitment_amount
+  )
+
+wb_projects_gov_out |> 
+  readr::write_csv(
+    here::here(
+      "inst", "extdata",
+      "wb_projects_gov.csv"
+    )
   )
 
 # write out regional subsets to inst extdata in csv format and using group_walk

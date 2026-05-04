@@ -49,6 +49,7 @@ wb_projects <- wb_projects |>
     lead_gp = lead_gp_code,
     contrib_gp = proj_mgd_contrib_practice_list,
     ttl = team_lead_full_name,
+    agreement_type = agrmnt_type_code,
     commitment_amount = cmt_amt
   ) |> 
   filter(
