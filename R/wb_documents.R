@@ -62,6 +62,7 @@ fetch_wb_documents_json <- function(
 #'
 #' @importFrom purrr pluck map map_chr
 #' @importFrom dplyr bind_rows filter
+#' @importFrom rlang .data
 #'
 #' @examples
 #' \dontrun{
