@@ -169,7 +169,7 @@ region_acronyms <- c(
   "Sub-Saharan Africa"                               = "afr",
   "Eastern and Southern Africa"                      = "afe",
   "Western and Central Africa"                       = "afw",
-  "Middle East, North Africa, Afghanistan, and Pakistan" = "mena"
+  "Middle East, North Africa, Afghanistan, and Pakistan" = "menaap"
 )
 
 # prune
@@ -204,24 +204,38 @@ wb_projects_gov |>
 # write out regional subsets as xlsx with two sheets (Lending, ASA)
 wb_projects_gov |>
   mutate(
-    region_acronym = recode(region, !!!region_acronyms)
+    region_acronym = recode(region, !!!region_acronyms),
+    comments = ""
   ) |>
   group_by(region_acronym) |>
   group_walk(
     ~ {
       wb <- openxlsx::createWorkbook()
 
-      openxlsx::addWorksheet(wb, "Lending")
-      openxlsx::writeData(
-        wb, "Lending",
-        .x |> filter(product_line_type == "Lending Product")
-      )
+      wrap_style <- openxlsx::createStyle(wrapText = TRUE, valign = "top")
 
-      openxlsx::addWorksheet(wb, "ASA")
-      openxlsx::writeData(
-        wb, "ASA",
-        .x |> filter(product_line_type == "Analytic and Advisory Activities Product")
-      )
+      write_sheet <- function(wb, sheet_name, data) {
+        openxlsx::addWorksheet(wb, sheet_name)
+        openxlsx::writeData(wb, sheet_name, data)
+        openxlsx::addStyle(
+          wb, sheet_name,
+          style     = wrap_style,
+          rows      = seq_len(nrow(data) + 1),
+          cols      = seq_len(ncol(data)),
+          gridExpand = TRUE
+        )
+        openxlsx::setColWidths(
+          wb, sheet_name,
+          cols   = seq_len(ncol(data)),
+          widths = "auto"
+        )
+        # override auto-width for known wide columns
+        openxlsx::setColWidths(wb, sheet_name, cols = which(names(data) == "pdo"),       widths = 60)
+        openxlsx::setColWidths(wb, sheet_name, cols = which(names(data) == "proj_name"), widths = 40)
+      }
+
+      write_sheet(wb, "Lending", .x |> filter(product_line_type == "Lending Product"))
+      write_sheet(wb, "ASA",     .x |> filter(product_line_type == "Analytic and Advisory Activities Product"))
 
       openxlsx::saveWorkbook(
         wb,
