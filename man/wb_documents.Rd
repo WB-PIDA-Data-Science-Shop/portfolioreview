@@ -3,7 +3,11 @@
 \docType{data}
 \name{wb_documents}
 \alias{wb_documents}
-\title{World Bank Documents API: 2025 document catalog (flattened)}
+\title{in IDA and Blend countries, with theme classification flags
+derived from project themes and components. Reports API,
+with authors flattened to a single semicolon-separated string per document
+and selected metadata fields standardized. Data were fetched for the period
+2025-01-01 to 2025-12-31 using the v3 API.}
 \format{
 A tibble with one row per document and the following columns:
 \describe{
@@ -34,7 +38,8 @@ https://documents.worldbank.org/en/publication/documents-reports/api
 wb_documents
 }
 \description{
-A tibble of documents retrieved from the World Bank Documents & Reports API,
+in IDA and Blend countries, with theme classification flags
+derived from project themes and components. Reports API,
 with authors flattened to a single semicolon-separated string per document
 and selected metadata fields standardized. Data were fetched for the period
 2025-01-01 to 2025-12-31 using the v3 API.

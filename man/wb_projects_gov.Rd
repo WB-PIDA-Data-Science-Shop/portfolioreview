@@ -3,7 +3,7 @@
 \docType{data}
 \name{wb_projects_gov}
 \alias{wb_projects_gov}
-\title{World Bank Governance Portfolio: Active IDA/Blend Projects (FY2018–present)}
+\title{World Bank Governance Portfolio: Active IDA/Blend Projects}
 \format{
 A tibble with one row per project and 22 columns:
 \describe{
@@ -48,15 +48,14 @@ wb_projects_gov
 }
 \description{
 A tibble of active World Bank lending operations led by the Governance (GOV)
-Global Practice in IDA and Blend countries, approved in FY2018 or later,
-with theme classification flags derived from project themes and components.
+Global Practice in IDA and Blend countries.
 }
 \details{
 Filtered to operations where:
 \itemize{
 \item \code{proj_status} is \"Active\"
 \item \code{lead_gp} is \"GOV\"
-\item \code{proj_approval_fy} is 2018 or later
+\item \code{proj_approval_fy} is a valid fiscal year (non-zero)
 \item \code{lending_category} is \"IDA\" or \"Blend\" (joined from \code{wb_income_and_region})
 \item At least one of \code{theme_pfm}, \code{theme_procurement}, \code{theme_public_admin},
 or \code{theme_es} is \code{TRUE}

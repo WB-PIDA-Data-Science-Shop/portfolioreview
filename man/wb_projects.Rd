@@ -3,7 +3,7 @@
 \docType{data}
 \name{wb_projects}
 \alias{wb_projects}
-\title{World Bank Operations: Governance Portfolio (2015–present)}
+\title{World Bank Operations: Governance Portfolio}
 \format{
 A tibble with 796 rows and 16 columns:
 \describe{
