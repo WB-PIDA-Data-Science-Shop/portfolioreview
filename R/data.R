@@ -1,6 +1,5 @@
-#' World Bank Documents API: 2025 document catalog (flattened)
-#'
-#' A tibble of documents retrieved from the World Bank Documents & Reports API,
+#' in IDA and Blend countries, with theme classification flags
+#' derived from project themes and components. Reports API,
 #' with authors flattened to a single semicolon-separated string per document
 #' and selected metadata fields standardized. Data were fetched for the period
 #' 2025-01-01 to 2025-12-31 using the v3 API.
@@ -54,7 +53,7 @@
 #' @source Derived from World Bank Documents & Reports API unit labels.
 "gov_unit"
 
-#' World Bank Operations: Governance Portfolio (2015–present)
+#' World Bank Operations: Governance Portfolio
 #'
 #' A tibble of World Bank lending and advisory operations filtered to those
 #' led by or contributing to the Governance (GOV) Global Practice.
@@ -114,7 +113,7 @@
 #' }
 #'
 #' @details
-#' Components with `cmpnt_actn_code` of `"TO BE DELETED"` or `"Marked for Deletion"`
+#' Components with `cmpnt_actn_code` of `"TO BE DELETED"` or `"Marked for Deletion"` 
 #' are excluded (251 records removed). The remaining records include components with
 #' action codes `NA` (standard), `"Revised"`, and `"New"`.
 #'
@@ -242,11 +241,10 @@
 #'   \url{https://dataexplorer.worldbank.org/data/details?id=DS04463}
 "wb_project_themes"
 
-#' World Bank Governance Portfolio: Active IDA/Blend Projects (FY2018–present)
+#' World Bank Governance Portfolio: Active IDA/Blend Projects
 #'
 #' A tibble of active World Bank lending operations led by the Governance (GOV)
-#' Global Practice in IDA and Blend countries, approved in FY2018 or later,
-#' with theme classification flags derived from project themes and components.
+#' Global Practice in IDA and Blend countries.
 #'
 #' @format A tibble with one row per project and 22 columns:
 #' \describe{
@@ -285,7 +283,7 @@
 #' Filtered to operations where:
 #' - `proj_status` is \"Active\"
 #' - `lead_gp` is \"GOV\"
-#' - `proj_approval_fy` is 2018 or later
+#' - `proj_approval_fy` is a valid fiscal year (non-zero)
 #' - `lending_category` is \"IDA\" or \"Blend\" (joined from `wb_income_and_region`)
 #' - At least one of `theme_pfm`, `theme_procurement`, `theme_public_admin`,
 #'   or `theme_es` is `TRUE`

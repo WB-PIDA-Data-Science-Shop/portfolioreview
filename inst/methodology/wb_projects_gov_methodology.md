@@ -28,7 +28,7 @@ Starting from the full Project Master V3 dataset, projects were selected using t
 
 1. **Lead Global Practice:** Projects where the Governance Global Practice (`GOV`) is the designated lead GP.
 2. **Project status:** Active projects only (Pipeline and Closed projects excluded).
-3. **Approval fiscal year:** Projects approved in FY2018 or later.
+3. **Approval fiscal year:** Projects with a valid approval fiscal year recorded in the system.
 4. **IDA eligibility:** Projects in IDA-eligible or Blend countries only, as classified in the World Bank FY2026 List of Economies. Regional or multi-country projects were matched on the primary country code recorded in the project record.
 5. **Theme relevance:** At least one of the four thematic classification flags (see below) must be `TRUE`.
 
@@ -55,4 +55,4 @@ Each theme flag takes a value of TRUE or FALSE, depending on whether the project
 
 ## Final Dataset
 
-The final dataset (`wb_projects_gov`) contains **81 active projects** across 9 World Bank regions, approved between FY2018 and FY2028 (including both lending operations and ASAs). Each row corresponds to one project, with additional project information. Considering only projects approved in FY2026, there are currently 12 projects active, including 9 lending operations and 3 ASAs.
+The final dataset (`wb_projects_gov`) contains **81 active projects** across 9 World Bank regions, (including both lending operations and ASAs). Each row corresponds to one project, with additional project information. Considering only projects approved in FY2026, there are currently 12 projects active, including 9 lending operations and 3 ASAs.

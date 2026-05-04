@@ -173,7 +173,7 @@ region_acronyms <- c(
 )
 
 # prune
-wb_projects_gov_out <- wb_projects_gov |> 
+wb_projects_gov <- wb_projects_gov |> 
   select(
     proj_id,
     proj_name,
@@ -188,9 +188,12 @@ wb_projects_gov_out <- wb_projects_gov |>
     ttl,
     agreement_type,
     commitment_amount
+  ) |> 
+  arrange(
+    region, country_name, proj_approval_fy
   )
 
-wb_projects_gov_out |> 
+wb_projects_gov |> 
   readr::write_csv(
     here::here(
       "inst", "extdata",
@@ -198,20 +201,34 @@ wb_projects_gov_out |>
     )
   )
 
-# write out regional subsets to inst extdata in csv format and using group_walk
-wb_projects_gov_out |> 
+# write out regional subsets as xlsx with two sheets (Lending, ASA)
+wb_projects_gov |>
   mutate(
     region_acronym = recode(region, !!!region_acronyms)
-  ) |> 
-  group_by(region_acronym) |> 
+  ) |>
+  group_by(region_acronym) |>
   group_walk(
-    ~ readr::write_csv(
-      .x,
-      here::here(
-        "inst", "extdata",
-        paste0("wb_projects_gov_", .y$region_acronym, ".csv")
+    ~ {
+      wb <- openxlsx::createWorkbook()
+
+      openxlsx::addWorksheet(wb, "Lending")
+      openxlsx::writeData(
+        wb, "Lending",
+        .x |> filter(product_line_type == "Lending Product")
       )
-    )
+
+      openxlsx::addWorksheet(wb, "ASA")
+      openxlsx::writeData(
+        wb, "ASA",
+        .x |> filter(product_line_type == "Analytic and Advisory Activities Product")
+      )
+
+      openxlsx::saveWorkbook(
+        wb,
+        here::here("inst", "extdata", paste0("wb_projects_gov_", .y$region_acronym, ".xlsx")),
+        overwrite = TRUE
+      )
+    }
   )
 
 usethis::use_data(wb_projects_gov, overwrite = TRUE)
