@@ -1,6 +1,5 @@
 ## code to prepare `wb_projects_gov` dataset goes here
-# #ave a list of projects that we drop because we classify them 
-# as not contributing (e.g., HRM or public procurement)
+# date: 5/11/2026
 # set-up -----------------------------------------------------------------
 library(dplyr)
 library(stringr)
@@ -28,7 +27,7 @@ projects_ida_20 <- read_csv(
 wb_projects_gov <- portfolioreview::wb_projects |> 
   filter(
       proj_status == "Active" &
-      lead_gp == "GOV" &
+      (lead_gp == "GOV" | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
       (agreement_type != "RETF" | is.na(agreement_type))
   ) |> 
   # only IDA and blend countries
@@ -159,6 +158,26 @@ wb_projects_gov <- wb_projects_gov |>
   ) |> 
   select(-component_procurement)
 
+# validation
+wb_projects_gov_validated <- wb_projects_gov |>
+  # exclude projects flagged by regional teams
+  filter(
+    !(
+      proj_id %in% c(
+        # Eastern and Southern Africa
+        "P171762", # counted in the IDA 20 cycle
+        "P173178", # counted in the IDA 20 cycle
+        # Western and Central Africa
+        "P506528", # primarily a human capital project
+        "P513735",
+        # Middle East, North Africa, Afghanistan, and Pakistan
+        "P166978", # already completed in 2023
+        # South Asia
+        "P515116" # will be dropped by June
+      )
+    )
+  )
+
 # write-out --------------------------------------------------------------
 region_acronyms <- c(
   "East Asia and Pacific"                            = "eap",
@@ -173,7 +192,7 @@ region_acronyms <- c(
 )
 
 # prune
-wb_projects_gov <- wb_projects_gov |> 
+wb_projects_gov_validated <- wb_projects_gov_validated |> 
   select(
     proj_id,
     proj_name,
@@ -193,7 +212,7 @@ wb_projects_gov <- wb_projects_gov |>
     region, country_name, proj_approval_fy
   )
 
-wb_projects_gov |> 
+wb_projects_gov_validated |> 
   readr::write_csv(
     here::here(
       "inst", "extdata",
@@ -202,7 +221,7 @@ wb_projects_gov |>
   )
 
 # write out regional subsets as xlsx with two sheets (Lending, ASA)
-wb_projects_gov |>
+wb_projects_gov_validated |>
   mutate(
     region_acronym = recode(region, !!!region_acronyms),
     comments = ""

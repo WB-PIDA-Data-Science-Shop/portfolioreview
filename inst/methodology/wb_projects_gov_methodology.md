@@ -11,11 +11,11 @@ All underlying data were extracted from the [World Bank Data Explorer](https://d
 
 | Dataset | File | Extracted |
 |---|---|---|
-| Project Master V3 | `PROJECT_MASTER_V3` | April 21, 2026 |
-| Country Reference | `COUNTRY` | April 22, 2026 |
+| Project Master File | [`PROJECT_MASTER_V3`](https://dataexplorer.worldbank.org/data/details?id=DS04442&t=Preview%20Data) | April 21, 2026 |
+| Country List | [`COUNTRY`(https://dataexplorer.worldbank.org/data/details?id=DS04532&t=Preview%20Data)] | April 22, 2026 |
 | Project Component List V3 | `PROJECT_COMPONENT_LIST_V3` | April 22, 2026 |
-| Project Theme V3 | `PROJECT_THEME_V3` | April 29, 2026 |
-| Theme Reference | `THEME` | April 29, 2026 |
+| Project Themes | `PROJECT_THEME_V3` | April 29, 2026 |
+| Theme List | `THEME` | April 29, 2026 |
 | Project Result Indicator Detail V2 | `PROJECT_RESULT_IND_DETAIL_V2` | April 29, 2026 |
 
 World Bank lending category and income group classifications were sourced from the World Bank country classification file (List of Economies, FY2026).
