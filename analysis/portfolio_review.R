@@ -24,6 +24,28 @@ wb_asa_gov <- wb_projects_gov |>
   )
 
 # analyze ----------------------------------------------------------------
+# number of projects per country
+wb_lending_gov |> 
+  group_by(country_name) |> 
+  summarise(
+    rate = n_distinct(proj_id)
+  ) |> 
+  arrange(desc(rate)) |> 
+  ggplot(
+    aes(rate, reorder(country_name, rate))
+  ) +
+  geom_col(
+    fill = "steelblue",
+    alpha = 0.7
+  )
+
+ggsave(
+  here::here("analysis", "figures", "lending_by_country.png"),
+  width = 8,
+  height = 12,
+  bg = "white"
+)
+
 # distinct projects
 wb_lending_gov |> 
   group_by(proj_approval_fy) |> 
@@ -268,6 +290,117 @@ wb_lending_gov |>
 
 ggsave(
   here::here("analysis", "figures", "lending_theme_breakdown_2026_by_region.png"),
+  width = 8,
+  height = 5,
+  bg = "white"
+)
+
+# country count ----------------------------------------------------------
+# number of countries with projects, divided by lending and ASA
+# with two facets: proj_approval_fy == 2026 vs. all years
+wb_projects_gov |> 
+  mutate(
+    product_line_type = case_match(
+      product_line_type,
+      "Lending Product" ~ "Lending",
+      "Analytic and Advisory Activities Product" ~ "ASA"
+    ),
+    ida_cycle = if_else(
+      proj_approval_fy >= 2026,
+      "IDA21",
+      "Before-IDA21"
+    )
+  ) |> 
+  group_by(ida_cycle, product_line_type) |> 
+  summarise(
+    n_countries = n_distinct(country_name)
+  ) |> 
+  ggplot(
+    aes(product_line_type, n_countries, fill = product_line_type)
+  ) +
+  geom_col(
+    alpha = 0.7
+  ) +
+  # add number of projects as text labels
+  geom_text(
+    aes(label = n_countries),
+    vjust = -0.5,
+    size = 5
+  ) +
+  scale_fill_solarized() +
+  facet_wrap(
+    vars(ida_cycle),
+    ncol = 2
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave(
+  here::here("analysis", "figures", "country_count_by_cycle.png"),
+  width = 8,
+  height = 5,
+  bg = "white"
+)
+
+# by theme
+wb_projects_gov |> 
+  mutate(
+    product_line_type = case_match(
+      product_line_type,
+      "Lending Product" ~ "Lending",
+      "Analytic and Advisory Activities Product" ~ "ASA"
+    ),
+    ida_cycle = if_else(
+      proj_approval_fy >= 2026,
+      "IDA21",
+      "Before-IDA21"
+    )
+  ) |> 
+  tidyr::pivot_longer(
+    cols = c(theme_pfm, theme_procurement, theme_public_admin, theme_env_social),
+    names_to = "theme",
+    values_to = "has_theme",
+    names_prefix = "theme_"
+  ) |> 
+  # relabel themes
+  mutate(
+    theme = case_match(
+      theme,
+      "pfm"                  ~ "Public Financial Management",
+      "procurement"          ~ "Public Procurement",
+      "public_admin"         ~ "Public Administration",
+      "env_social"          ~ "Environmental and Social"
+    )
+  ) |>
+  filter(has_theme) |>
+  group_by(ida_cycle, theme) |> 
+  summarise(
+    n_countries = n_distinct(country_name)
+  ) |> 
+  ggplot(
+    aes(theme, n_countries, fill = theme)
+  ) +
+  geom_col(
+    alpha = 0.7
+  ) +
+  # add number of projects as text labels
+  geom_text(
+    aes(label = n_countries),
+    vjust = -0.5,
+    size = 5
+  ) +
+  scale_fill_solarized() +
+  facet_wrap(
+    vars(ida_cycle),
+    ncol = 2
+  ) +
+  theme(
+    legend.position = "bottom"
+  )
+
+ggsave(
+  here::here("analysis", "figures", "country_count_by_theme_cycle.png"),
   width = 8,
   height = 5,
   bg = "white"

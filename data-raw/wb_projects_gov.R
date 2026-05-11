@@ -170,6 +170,7 @@ wb_projects_gov_validated <- wb_projects_gov |>
         # Western and Central Africa
         "P506528", # primarily a human capital project
         "P513735",
+        "P511539", # remove duplicate
         # Middle East, North Africa, Afghanistan, and Pakistan
         "P166978", # already completed in 2023
         # South Asia
