@@ -125,10 +125,10 @@ wb_projects_gov_theme <- portfolioreview::wb_projects |>
     relationship = "many-to-many"
   ) |>
   summarise(
-    theme_pfm            = any(theme_category == "Public Finance Management",                        na.rm = TRUE),
-    theme_procurement    = any(theme_category == "Public Procurement",                               na.rm = TRUE),
-    theme_public_admin   = any(theme_category == "Public Administration",                            na.rm = TRUE),
-    theme_env_social  = any(theme_category == "Institutional dimensions of social and environmental aspects", na.rm = TRUE),
+    theme_pfm            = if_else(any(theme_category == "Public Finance Management",                                     na.rm = TRUE), 1L, 0L),
+    theme_procurement    = if_else(any(theme_category == "Public Procurement",                                           na.rm = TRUE), 1L, 0L),
+    theme_public_admin   = if_else(any(theme_category == "Public Administration",                                        na.rm = TRUE), 1L, 0L),
+    theme_env_social     = if_else(any(theme_category == "Institutional dimensions of social and environmental aspects", na.rm = TRUE), 1L, 0L),
     .by = proj_id
   )
 
@@ -152,8 +152,8 @@ wb_projects_gov <- wb_projects_gov |>
   mutate(
     theme_procurement = if_else(
       !is.na(component_procurement) | theme_procurement,
-      TRUE,
-      FALSE
+      1,
+      0
     )
   ) |> 
   select(-component_procurement)
@@ -207,7 +207,8 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     lead_gp,
     ttl,
     agreement_type,
-    commitment_amount
+    commitment_amount,
+    starts_with("theme_")
   ) |> 
   arrange(
     region, country_name, proj_approval_fy
@@ -264,5 +265,7 @@ wb_projects_gov_validated |>
       )
     }
   )
+
+wb_projects_gov <- wb_projects_gov_validated
 
 usethis::use_data(wb_projects_gov, overwrite = TRUE)

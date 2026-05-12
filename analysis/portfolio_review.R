@@ -3,6 +3,7 @@ library(dplyr)
 library(ggplot2)
 library(stringr)
 library(ggthemes)
+library(tidyr)
 
 theme_set(
   theme_minimal()
@@ -45,6 +46,21 @@ ggsave(
   height = 12,
   bg = "white"
 )
+
+# number of projects per country, by product line
+wb_projects_gov |> 
+  group_by(country_name, product_line_type) |> 
+  summarise(
+    rate = n_distinct(proj_id)
+  ) |>
+  pivot_wider(
+    names_from = product_line_type,
+    values_from = rate,
+    values_fill = 0
+  ) |> 
+  write_csv(
+    here::here("projects_by_country_product_line.csv")
+  )
 
 # distinct projects
 wb_lending_gov |> 
@@ -327,19 +343,23 @@ wb_projects_gov |>
     vjust = -0.5,
     size = 5
   ) +
+  labs(
+    x = "Product line",
+    y = "Number of countries with projects"
+  ) +
   scale_fill_solarized() +
   facet_wrap(
     vars(ida_cycle),
     ncol = 2
   ) +
   theme(
-    legend.position = "bottom"
+    legend.position = "none"
   )
 
 ggsave(
   here::here("analysis", "figures", "country_count_by_cycle.png"),
   width = 8,
-  height = 5,
+  height = 6,
   bg = "white"
 )
 
@@ -373,7 +393,7 @@ wb_projects_gov |>
       "env_social"          ~ "Environmental and Social"
     )
   ) |>
-  filter(has_theme) |>
+  filter(has_theme == 1) |>
   group_by(ida_cycle, theme) |> 
   summarise(
     n_countries = n_distinct(country_name)
@@ -390,18 +410,24 @@ wb_projects_gov |>
     vjust = -0.5,
     size = 5
   ) +
+  # tilt x-axis labels for readability
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  ) +
   scale_fill_solarized() +
   facet_wrap(
     vars(ida_cycle),
     ncol = 2
   ) +
-  theme(
-    legend.position = "bottom"
+  labs(
+    x = "Thematic area",
+    y = "Number of countries with projects"
   )
 
 ggsave(
   here::here("analysis", "figures", "country_count_by_theme_cycle.png"),
   width = 8,
-  height = 5,
+  height = 7,
   bg = "white"
 )
