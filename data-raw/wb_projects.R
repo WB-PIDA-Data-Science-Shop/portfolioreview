@@ -32,6 +32,16 @@ country_list <- read_csv(
   ) |> 
   distinct(cntry_cde, iso3_cntry_cde)
 
+# extracted from https://standardreports.worldbank.org/reports/ASA/A0805
+# on: 5-12-2026
+asa_approved_current_fy <- readxl::read_xlsx(
+  here("data-raw", "input", "standard-report", "A8.5 ASA Initiated in Current FY.xlsx")
+) |> 
+  select(
+    proj_id = `Task ID`,
+    asa_cn_approval_date = `CN Approval`
+  )
+
 wb_projects <- wb_projects |> 
   select(
     proj_id,
@@ -42,6 +52,7 @@ wb_projects <- wb_projects |>
     proj_url = proj_portal_url,
     product_line_type = prod_line_type_name,
     product_line_name = prod_line_name,
+    task_type = task_type_name, # for ASAs to identify advisory vs. analytical
     country_code = cntry_code,
     country_name = cntry_long_name,
     region = rgn_name,
@@ -67,6 +78,11 @@ wb_projects <- wb_projects |>
   mutate(
     country_code = coalesce(country_code_clean, country_code)
   ) |> 
-  select(-country_code_clean)
+  select(-country_code_clean) |> 
+  # add ASA approval date
+  left_join(
+    asa_approved_current_fy,
+    by = "proj_id"
+  )
 
 usethis::use_data(wb_projects, overwrite = TRUE)

@@ -1,0 +1,180 @@
+---
+title: "IDA21 Policy Commitment: Institutional Strengthening"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document:
+    reference_docx: null
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 8,
+  fig.height = 5
+)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(stringr)
+library(tidyr)
+
+devtools::load_all()
+
+theme_set(theme_minimal())
+
+wb_projects_gov <- portfolioreview::wb_projects_gov
+
+wb_lending_gov <- wb_projects_gov |>
+  filter(product_line_type == "Lending Product")
+
+wb_asa_gov <- wb_projects_gov |>
+  filter(product_line_type == "Analytic and Advisory Activities Product")
+
+theme_labels <- function(x) {
+  case_match(
+    x,
+    "pfm"                  ~ "Public Financial Management",
+    "procurement"          ~ "Public Procurement",
+    "public_admin"         ~ "Public Administration",
+    "env_social"           ~ "Environmental & Social",
+    "environmental_social" ~ "Environmental & Social"
+  )
+}
+```
+
+## Overview
+
+This portfolio review monitors the World Bank Governance Global Practice (GOV) portfolio in IDA-eligible and Blend countries, in support of the IDA21 Policy Commitment on Institutional Strengthening. The portfolio covers active lending operations and Advisory Services and Analytics (ASA) led by the Governance GP. Projects are classified across four thematic areas: Public Financial Management, Public Procurement, Public Administration, and Environmental & Social Governance.
+
+The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**.
+
+---
+
+## Lending portfolio trends
+
+Number of GOV-led lending operations approved per fiscal year that are currently active in IDA/Blend countries.
+
+```{r lending-trends}
+wb_lending_gov |>
+  summarise(n = n_distinct(proj_id), .by = proj_approval_fy) |>
+  ggplot(aes(proj_approval_fy, n)) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_line(linewidth = 1.2, alpha = 0.7) +
+  labs(
+    x = "Fiscal year of approval",
+    y = "Number of projects"
+  )
+```
+
+---
+
+## Lending portfolio by region
+
+```{r lending-by-region}
+wb_lending_gov |>
+  summarise(n = n_distinct(proj_id), .by = c(proj_approval_fy, region)) |>
+  ggplot(aes(proj_approval_fy, n, color = region)) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_line(linewidth = 1.2, alpha = 0.7) +
+  scale_color_solarized() +
+  labs(
+    x = "Fiscal year of approval",
+    y = "Number of projects",
+    color = "Region"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+---
+
+## Thematic breakdown over time
+
+Number of lending operations per thematic area by fiscal year.
+
+```{r theme-trends}
+wb_lending_gov |>
+  summarise(
+    pfm          = sum(theme_pfm),
+    procurement  = sum(theme_procurement),
+    public_admin = sum(theme_public_admin),
+    env_social   = sum(theme_env_social),
+    .by = proj_approval_fy
+  ) |>
+  pivot_longer(-proj_approval_fy, names_to = "theme", values_to = "n") |>
+  mutate(theme = theme_labels(theme)) |>
+  ggplot(aes(proj_approval_fy, n, color = theme)) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_line(linewidth = 1.2, alpha = 0.7) +
+  scale_color_solarized() +
+  labs(
+    x = "Fiscal year of approval",
+    y = "Number of projects",
+    color = "Theme"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+---
+
+## Country reach by IDA cycle
+
+Number of countries with at least one active project (lending or ASA), comparing the current IDA21 cycle (FY2026 onwards) to the preceding period.
+
+```{r country-count-by-cycle}
+wb_projects_gov |>
+  mutate(
+    product_line_type = case_match(
+      product_line_type,
+      "Lending Product"                          ~ "Lending",
+      "Analytic and Advisory Activities Product" ~ "ASA"
+    ),
+    ida_cycle = if_else(proj_approval_fy >= 2026, "IDA21", "Before IDA21")
+  ) |>
+  summarise(n_countries = n_distinct(country_name), .by = c(ida_cycle, product_line_type)) |>
+  ggplot(aes(product_line_type, n_countries, fill = product_line_type)) +
+  geom_col(alpha = 0.7) +
+  geom_text(aes(label = n_countries), vjust = -0.5, size = 4) +
+  facet_wrap(vars(ida_cycle), ncol = 2) +
+  scale_fill_solarized() +
+  labs(
+    x = "Product line",
+    y = "Number of countries"
+  ) +
+  theme(legend.position = "none")
+```
+
+---
+
+## Country reach by thematic area and IDA cycle
+
+```{r country-count-by-theme-cycle, fig.height=6}
+wb_projects_gov |>
+  mutate(
+    ida_cycle = if_else(proj_approval_fy >= 2026, "IDA21", "Before IDA21")
+  ) |>
+  pivot_longer(
+    cols         = c(theme_pfm, theme_procurement, theme_public_admin, theme_env_social),
+    names_to     = "theme",
+    values_to    = "has_theme",
+    names_prefix = "theme_"
+  ) |>
+  mutate(theme = theme_labels(theme)) |>
+  filter(has_theme == 1) |>
+  summarise(n_countries = n_distinct(country_name), .by = c(ida_cycle, theme)) |>
+  ggplot(aes(theme, n_countries, fill = theme)) +
+  geom_col(alpha = 0.7) +
+  geom_text(aes(label = n_countries), vjust = -0.5, size = 4) +
+  facet_wrap(vars(ida_cycle), ncol = 2) +
+  scale_fill_solarized() +
+  labs(
+    x = "Thematic area",
+    y = "Number of countries"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.x     = element_text(angle = 30, hjust = 1)
+  )
+```

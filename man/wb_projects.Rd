@@ -16,6 +16,8 @@ A tibble with 796 rows and 16 columns:
 \item{product_line_type}{Character. Product line type: \"Lending Product\" or
 \"Analytic and Advisory Activities Product\".}
 \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}
+\item{task_type}{Character. Task type for ASAs: \"Advisory\" or \"Analytical\". \code{NA} for non-ASA operations.}
+\item{asa_cn_approval_date}{Date. For ASAs, the date of Concept Note approval. \code{NA} for non-ASA operations.}
 \item{country_code}{Character. ISO 3-letter country code, or World Bank regional/group code
 where no ISO code is available.}
 \item{country_name}{Character. Full country or territory name.}
