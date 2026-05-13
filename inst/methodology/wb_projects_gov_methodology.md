@@ -1,9 +1,7 @@
 # Methodology Note: World Bank Governance IDA Portfolio Dataset
 
-**Prepared:** May 1, 2026 
-**Final sample:** 81 projects
-
----
+**Date:** May 13, 2026 
+**Final sample:** 67 projects
 
 ## Data Sources
 
@@ -20,19 +18,15 @@ All underlying data were extracted from the [World Bank Data Explorer](https://d
 
 World Bank lending category and income group classifications were sourced from the World Bank country classification file (List of Economies, FY2026).
 
----
-
 ## Sample Construction
 
 Starting from the full Project Master V3 dataset, projects were selected using the following criteria:
 
 1. **Lead Global Practice:** Projects where the Governance Global Practice (`GOV`) is the designated lead GP.
 2. **Project status:** Active projects only (Pipeline and Closed projects excluded).
-3. **Approval fiscal year:** Projects with a valid approval fiscal year recorded in the system.
+3. **Approval fiscal year:** Projects with a valid approval fiscal year recorded in the system. For ASAs, the Concept Note approval date was considered.
 4. **IDA eligibility:** Projects in IDA-eligible or Blend countries only, as classified in the World Bank FY2026 List of Economies. Regional or multi-country projects were matched on the primary country code recorded in the project record.
-5. **Theme relevance:** At least one of the four thematic classification flags (see below) must be `TRUE`.
-
----
+5. **Theme relevance:** At least one of the four thematic classification flags (see below) must be true.
 
 ## Thematic Classification
 
@@ -51,8 +45,6 @@ Each theme flag takes a value of TRUE or FALSE, depending on whether the project
 
 **Note on procurement:** The *Procurement* theme was introduced as a standalone World Bank thematic category only in 2025. For projects approved prior to FY2025, assignment to procurement was evaluated by identifying procurement as a keyword in one of the components (`PROJECT_COMPONENT_LIST_V3`).
 
----
-
 ## Final Dataset
 
-The final dataset (`wb_projects_gov`) contains **81 active projects** across 9 World Bank regions, (including both lending operations and ASAs). Each row corresponds to one project, with additional project information. Considering only projects approved in FY2026, there are currently 12 projects active, including 9 lending operations and 3 ASAs.
+The final dataset (`wb_projects_gov`) contains **67 active projects** across 9 World Bank regions, (including both lending operations and ASAs). Each row corresponds to one project, with additional project information.
