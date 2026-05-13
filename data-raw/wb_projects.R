@@ -32,10 +32,10 @@ country_list <- read_csv(
   ) |> 
   distinct(cntry_cde, iso3_cntry_cde)
 
-# extracted from https://standardreports.worldbank.org/reports/ASA/A0805
+# extracted from https://standardreports.worldbank.org/reports/ASA/A0801
 # on: 5-12-2026
-asa_approved_current_fy <- readxl::read_xlsx(
-  here("data-raw", "input", "standard-report", "A8.5 ASA Initiated in Current FY.xlsx")
+asa_active_details <- readxl::read_xlsx(
+  here("data-raw", "input", "standard-report", "A8.1 ASA Activity Details - Active.xlsx")
 ) |> 
   select(
     proj_id = `Task ID`,

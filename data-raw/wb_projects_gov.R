@@ -201,6 +201,8 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     region,
     country_name,
     proj_approval_fy,
+    asa_cn_approval_date,
+    task_type,
     proj_url,
     product_line_type,
     lending_instrument,
