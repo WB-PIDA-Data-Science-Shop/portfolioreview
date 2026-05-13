@@ -12,6 +12,8 @@ A tibble with one row per project and 22 columns:
 \item{proj_status}{Character. Current project status: \"Active\".}
 \item{pdo}{Character. Project Development Objective description.}
 \item{proj_approval_fy}{Double. Fiscal year in which the project was approved.}
+\item{task_type}{Character. Task type for ASAs: \"Advisory\" or \"Analytical\". \code{NA} for non-ASA operations.}
+\item{asa_cn_approval_date}{Date. For ASAs, the date of Concept Note approval. \code{NA} for non-ASA operations.}
 \item{proj_url}{Character. URL to the project page on the World Bank Operations Portal.}
 \item{product_line_type}{Character. Product line type (e.g., \"Lending Product\").}
 \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}

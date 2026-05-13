@@ -214,6 +214,20 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   ) |> 
   arrange(
     region, country_name, proj_approval_fy
+  ) |> 
+  # add ida cycle identifier
+  mutate(
+    ida_cycle_approval = case_when(
+      (proj_approval_fy < 2026 & product_line_type == "Lending Product") | 
+        ((asa_cn_approval_date < lubridate::as_date("2025-07-01") | proj_approval_fy < 2026) & product_line_type == "Analytic and Advisory Activities Product") ~ "Pre-IDA21",
+      (proj_approval_fy >= 2026 & product_line_type == "Lending Product") | 
+        (asa_cn_approval_date >= lubridate::as_date("2025-07-01") & product_line_type == "Analytic and Advisory Activities Product") ~ "IDA21",
+      TRUE ~ NA_character_
+    ) 
+  ) |>
+  # exclude 2 ASAs that cannot be attributed to a specific IDA cycle
+  filter(
+    !is.na(ida_cycle_approval)
   )
 
 wb_projects_gov_validated |> 

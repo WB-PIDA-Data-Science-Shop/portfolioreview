@@ -24,6 +24,15 @@ wb_asa_gov <- wb_projects_gov |>
     product_line_type == "Analytic and Advisory Activities Product"
   )
 
+# export tables ----------------------------------------------------------
+wb_projects_gov |> 
+  count(proj_approval_fy, product_line_type) |>
+  pivot_wider(
+    names_from = product_line_type,
+    values_from = n,
+    values_fill = 0
+  )
+
 # analyze ----------------------------------------------------------------
 # number of projects per country
 wb_lending_gov |> 

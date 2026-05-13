@@ -270,6 +270,7 @@
 #'   \item{ttl}{Character. Full name and role of the Task Team Leader.}
 #'   \item{commitment_amount}{Double. Total commitment amount in USD.}
 #'   \item{lending_category}{Character. World Bank lending category: \"IDA\" or \"Blend\".}
+#'   \item{ida_cycle_approval}{Character. IDA cycle identifier: \"Pre-IDA21\" or \"IDA21\", based on approval date (Concept Note for ASA, Board Approval for Lending) and product line. `NA` where not applicable.}
 #'   \item{theme_pfm}{Logical. `TRUE` if the project is associated with Public Financial
 #'     Management themes (e.g., budget management, debt, domestic revenue, audit).}
 #'   \item{theme_procurement}{Logical. `TRUE` if the project is associated with Public

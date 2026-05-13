@@ -81,7 +81,7 @@ wb_projects <- wb_projects |>
   select(-country_code_clean) |> 
   # add ASA approval date
   left_join(
-    asa_approved_current_fy,
+    asa_active_details,
     by = "proj_id"
   )
 
