@@ -5,6 +5,8 @@ library(stringr)
 library(countrycode)
 library(here)
 
+devtools::load_all()
+
 # extracted from https://dataexplorer.worldbank.org/data/details?id=DS04442&t=Preview%20Data
 # on: 2026-04-21
 wb_projects <- read_csv(
@@ -97,9 +99,9 @@ wb_projects <- wb_projects |>
     asa_active_details,
     by = "proj_id"
   ) |> 
-  # drop 5 ASAs without an AIN or CN approval date
+  # drop ASAs without an AIN or CN approval date
   filter(
-    !is.na(asa_approval_date)
+    !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
   ) |>
   # fix approval FY for ASAs
   mutate(
