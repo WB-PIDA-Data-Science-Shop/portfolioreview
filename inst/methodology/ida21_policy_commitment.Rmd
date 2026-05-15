@@ -162,7 +162,7 @@ wb_projects_gov |>
     approval_year      = if_else(
       product_line_type == "Lending Product",
       as.character(proj_approval_fy),
-      as.character(lubridate::year(asa_cn_approval_date))
+      as.character(lubridate::year(asa_approval_date))
     ),
     `Product Line`     = if_else(product_line_type == "Lending Product", "Lending", "ASA"),
     ida_cycle_approval = replace_na(ida_cycle_approval, "Unassigned")

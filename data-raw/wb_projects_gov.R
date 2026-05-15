@@ -1,5 +1,5 @@
 ## code to prepare `wb_projects_gov` dataset goes here
-# date: 5/11/2026
+# date: 5/15/2026
 # set-up -----------------------------------------------------------------
 library(dplyr)
 library(stringr)
@@ -201,7 +201,7 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     region,
     country_name,
     proj_approval_fy,
-    asa_cn_approval_date,
+    asa_approval_date,
     task_type,
     proj_url,
     product_line_type,
@@ -212,18 +212,6 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     commitment_amount,
     starts_with("theme_")
   ) |> 
-  # exclude 2 ASAs without CN approval date
-  filter(
-    !(is.na(asa_cn_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
-  ) |> 
-  # fix approval year for ASAs with a CN approval date
-  mutate(
-    proj_approval_fy = if_else(
-      product_line_type == "Analytic and Advisory Activities Product",
-      compute_fy(asa_cn_approval_date),
-      proj_approval_fy
-    )
-  ) |> 
   arrange(
     region, country_name, proj_approval_fy
   ) |> 
@@ -231,11 +219,15 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   mutate(
     ida_cycle_approval = case_when(
       (proj_approval_fy < 2026 & product_line_type == "Lending Product") | 
-        ((asa_cn_approval_date < lubridate::as_date("2025-07-01") | proj_approval_fy < 2026) & product_line_type == "Analytic and Advisory Activities Product") ~ "Pre-IDA21",
+        (asa_approval_date < 2026 & product_line_type == "Analytic and Advisory Activities Product") ~ "Pre-IDA21",
       (proj_approval_fy >= 2026 & product_line_type == "Lending Product") | 
-        (asa_cn_approval_date >= lubridate::as_date("2025-07-01") & product_line_type == "Analytic and Advisory Activities Product") ~ "IDA21",
+        (asa_approval_date >= 2026 & product_line_type == "Analytic and Advisory Activities Product") ~ "IDA21",
       TRUE ~ NA_character_
     ) 
+  ) |> 
+  # drop 5 ASAs without an AIN or CN approval date
+  filter(
+    !is.na(ida_cycle_approval)
   )
 
 wb_projects_gov_validated |> 

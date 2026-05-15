@@ -16,5 +16,5 @@
 compute_fy <- function(date) {
   year  <- lubridate::year(date)
   month <- lubridate::month(date)
-  if_else(month >= 7, year + 1L, year)
+  ifelse(month >= 7, year + 1L, year)
 }

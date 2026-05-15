@@ -39,7 +39,20 @@ asa_active_details <- readxl::read_xlsx(
 ) |> 
   select(
     proj_id = `Task ID`,
-    asa_cn_approval_date = `CN Approval`
+    asa_ain_approval_date = `AIN Sign Off Date`,
+    asa_cn_approval_date = `CN Approval`,
+    processing_track = `Processing Track`
+  ) |> 
+  mutate(
+    asa_approval_date = case_when(
+      processing_track == "Track 1" ~ asa_ain_approval_date,
+      processing_track == "Track 2" ~ asa_cn_approval_date,
+      T ~ NA
+    )
+  ) |> 
+  select(
+    proj_id,
+    asa_approval_date
   )
 
 wb_projects <- wb_projects |> 

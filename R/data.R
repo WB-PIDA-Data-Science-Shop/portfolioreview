@@ -70,7 +70,8 @@
 #'     \"Analytic and Advisory Activities Product\".}
 #'   \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}
 #'   \item{task_type}{Character. Task type for ASAs: \"Advisory\" or \"Analytical\". `NA` for non-ASA operations.}
-#'   \item{asa_cn_approval_date}{Date. For ASAs, the date of Concept Note approval. `NA` for non-ASA operations.}
+#'   \item{asa_approval_date}{Date. For ASAs, the effective approval date: AIN Sign Off Date for Track 1
+#'     tasks, CN Approval date for Track 2 tasks. `NA` for lending operations and untracked tasks.}
 #'   \item{country_code}{Character. ISO 3-letter country code, or World Bank regional/group code
 #'     where no ISO code is available.}
 #'   \item{country_name}{Character. Full country or territory name.}
@@ -256,7 +257,8 @@
 #'   \item{pdo}{Character. Project Development Objective description.}
 #'   \item{proj_approval_fy}{Double. Fiscal year in which the project was approved.}
 #'   \item{task_type}{Character. Task type for ASAs: \"Advisory\" or \"Analytical\". `NA` for non-ASA operations.}
-#'   \item{asa_cn_approval_date}{Date. For ASAs, the date of Concept Note approval. `NA` for non-ASA operations.}
+#'   \item{asa_approval_date}{Date. For ASAs, the effective approval date: AIN Sign Off Date for Track 1
+#'     tasks, CN Approval date for Track 2 tasks. `NA` for lending operations and untracked tasks.}
 #'   \item{proj_url}{Character. URL to the project page on the World Bank Operations Portal.}
 #'   \item{product_line_type}{Character. Product line type (e.g., \"Lending Product\").}
 #'   \item{product_line_name}{Character. Name of the product line (e.g., \"IBRD/IDA\").}
