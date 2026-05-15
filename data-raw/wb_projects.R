@@ -50,6 +50,10 @@ asa_active_details <- readxl::read_xlsx(
       T ~ NA
     )
   ) |> 
+  # drop 5 ASAs without an AIN or CN approval date
+  filter(
+    !is.na(asa_approval_date)
+  ) |>
   select(
     proj_id,
     asa_approval_date
@@ -96,6 +100,14 @@ wb_projects <- wb_projects |>
   left_join(
     asa_active_details,
     by = "proj_id"
+  ) |> 
+  # fix approval FY for ASAs
+  mutate(
+    proj_approval_fy = if_else(
+      product_line_type == "Analytic and Advisory Activities Product",
+      compute_fy(asa_approval_date),
+      proj_approval_fy
+    )
   )
 
 usethis::use_data(wb_projects, overwrite = TRUE)

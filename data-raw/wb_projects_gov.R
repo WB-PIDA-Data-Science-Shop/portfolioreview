@@ -217,17 +217,11 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   ) |> 
   # add ida cycle identifier
   mutate(
-    ida_cycle_approval = case_when(
-      (proj_approval_fy < 2026 & product_line_type == "Lending Product") | 
-        (asa_approval_date < 2026 & product_line_type == "Analytic and Advisory Activities Product") ~ "Pre-IDA21",
-      (proj_approval_fy >= 2026 & product_line_type == "Lending Product") | 
-        (asa_approval_date >= 2026 & product_line_type == "Analytic and Advisory Activities Product") ~ "IDA21",
-      TRUE ~ NA_character_
+    ida_cycle_approval = if_else(
+      proj_approval_fy < 2026, "Pre-IDA21",
+      proj_approval_fy == 2026, "IDA21",
+      T ~ NA_character_
     ) 
-  ) |> 
-  # drop 5 ASAs without an AIN or CN approval date
-  filter(
-    !is.na(ida_cycle_approval)
   )
 
 wb_projects_gov_validated |> 

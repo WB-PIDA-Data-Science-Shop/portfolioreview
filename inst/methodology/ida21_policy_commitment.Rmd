@@ -133,6 +133,46 @@ theme_base |>
 
 **Note**: Projects and countries may appear in more than one thematic area. Country totals are distinct within each theme; the Total column may be less than the sum of Lending and ASA if a country is supported by both.
 
+## By IDA cycle
+
+```{r theme-cycle-tables}
+cycle_order <- c("IDA21", "Pre-IDA21", "Unassigned")
+
+theme_cycle_base <- wb_projects_gov |>
+  mutate(
+    ida_cycle_approval = factor(replace_na(ida_cycle_approval, "Unassigned"), levels = cycle_order)
+  ) |>
+  pivot_longer(
+    cols      = c(theme_pfm, theme_procurement, theme_public_admin, theme_env_social),
+    names_to  = "theme",
+    values_to = "flag"
+  ) |>
+  filter(flag == 1) |>
+  mutate(theme = theme_labels(str_remove(theme, "theme_")))
+
+theme_cycle_base |>
+  count(theme, ida_cycle_approval) |>
+  pivot_wider(names_from = ida_cycle_approval, values_from = n, values_fill = 0) |>
+  mutate(Total = rowSums(across(where(is.integer)))) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of projects by thematic area and IDA cycle")
+
+theme_cycle_base |>
+  summarise(n = n_distinct(country_name), .by = c(theme, ida_cycle_approval)) |>
+  pivot_wider(names_from = ida_cycle_approval, values_from = n, values_fill = 0) |>
+  left_join(
+    theme_cycle_base |>
+      summarise(Total = n_distinct(country_name), .by = theme),
+    by = "theme"
+  ) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of distinct countries by thematic area and IDA cycle")
+```
+
+**Note**: Projects and countries may appear in more than one thematic area. Country totals in the Total column are distinct across all IDA cycles.
+
 # Country list
 
 ```{r country-list}

@@ -12,6 +12,7 @@
 #' compute_fy(as.Date("2025-08-11")) # FY2026
 #' compute_fy(as.Date("2025-06-30")) # FY2025
 #'
+#' @importFrom lubridate year month
 #' @export
 compute_fy <- function(date) {
   year  <- lubridate::year(date)
