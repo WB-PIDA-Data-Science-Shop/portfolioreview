@@ -212,6 +212,18 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     commitment_amount,
     starts_with("theme_")
   ) |> 
+  # exclude 2 ASAs without CN approval date
+  filter(
+    !(is.na(asa_cn_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
+  ) |> 
+  # fix approval year for ASAs with a CN approval date
+  mutate(
+    proj_approval_fy = if_else(
+      product_line_type == "Analytic and Advisory Activities Product",
+      compute_fy(asa_cn_approval_date),
+      proj_approval_fy
+    )
+  ) |> 
   arrange(
     region, country_name, proj_approval_fy
   ) |> 
@@ -224,10 +236,6 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
         (asa_cn_approval_date >= lubridate::as_date("2025-07-01") & product_line_type == "Analytic and Advisory Activities Product") ~ "IDA21",
       TRUE ~ NA_character_
     ) 
-  ) |>
-  # exclude 2 ASAs that cannot be attributed to a specific IDA cycle
-  filter(
-    !is.na(ida_cycle_approval)
   )
 
 wb_projects_gov_validated |> 
