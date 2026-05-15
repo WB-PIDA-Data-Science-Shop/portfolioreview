@@ -50,10 +50,6 @@ asa_active_details <- readxl::read_xlsx(
       T ~ NA
     )
   ) |> 
-  # drop 5 ASAs without an AIN or CN approval date
-  filter(
-    !is.na(asa_approval_date)
-  ) |>
   select(
     proj_id,
     asa_approval_date
@@ -101,6 +97,10 @@ wb_projects <- wb_projects |>
     asa_active_details,
     by = "proj_id"
   ) |> 
+  # drop 5 ASAs without an AIN or CN approval date
+  filter(
+    !is.na(asa_approval_date)
+  ) |>
   # fix approval FY for ASAs
   mutate(
     proj_approval_fy = if_else(

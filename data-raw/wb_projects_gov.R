@@ -214,12 +214,12 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   ) |> 
   arrange(
     region, country_name, proj_approval_fy
-  ) |> 
+  ) |>
   # add ida cycle identifier
   mutate(
-    ida_cycle_approval = if_else(
-      proj_approval_fy < 2026, "Pre-IDA21",
-      proj_approval_fy == 2026, "IDA21",
+    ida_cycle_approval = case_when(
+      proj_approval_fy < 2026 ~ "Pre-IDA21",
+      proj_approval_fy == 2026 ~ "IDA21",
       T ~ NA_character_
     ) 
   )
