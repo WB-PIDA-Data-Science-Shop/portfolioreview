@@ -110,7 +110,7 @@ wb_country_ida_gov <- wb_country_ida_gov |>
 ```
 
 # Plot 1. Comparative analysis of CPIA scores between IDA countries with/without GOV engagements
-```{r}
+```{r, fig.width = 18, fig.height = 8}
 wb_country_ida_gov |> 
     filter(
         gov_engagement == "No GOV operational engagement"
