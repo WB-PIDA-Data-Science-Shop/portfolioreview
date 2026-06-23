@@ -1,0 +1,65 @@
+Project Count,Project ID,Project Name,Country,Instrument Type,Approval Fiscal Year,Approval Date,PFM project,Procurement project,Public Administration project,Environmental and Social project
+1,P513817,Value Chain Assessment of Procurement Processes in Government Departments in Cambodia,Kingdom of Cambodia,ASA,2026,2025-09-25T00:00:00Z,0,1,0,0
+2,P510862,Enhancing Public Financial Management through Information and Communication Technology and Skills (EFITS) 2 Project,Lao People's Democratic Republic,IPF,2026,2025-11-07T00:00:00Z,1,0,0,1
+3,P513759,"Nepal: Building Transparent and Accountable Institutions for Growth, Service Delivery, and Job Creation",Nepal,ASA,2026,2025-09-29T00:00:00Z,1,0,0,0
+4,P513657,Sovereign Wealth Fund Options to Support Macro-Fiscal Stability and Sustainable Development in Guinea,Republic of Guinea,ASA,2026,2026-03-06T00:00:00Z,1,0,0,1
+5,P511035,Optimization of Public Finance Management in Honduras,Republic of Honduras,IPF,2026,2025-10-09T00:00:00Z,1,0,0,1
+6,P507538,Revenue Improvement and Spending Efficiency Program-for-Results Operation,Republic of Rwanda,PforR,2026,2025-11-21T00:00:00Z,1,1,0,1
+7,P515209,Tajikistan Public Expenditure and Financial Accountability Assessments 2026,Republic of Tajikistan,ASA,2026,2026-02-19T00:00:00Z,1,1,0,0
+8,P511206,Uganda Strengthening Public Investment and Asset Management for Growth and Resilience Operation (PIM Plus),Republic of Uganda,PforR,2026,2025-09-03T00:00:00Z,1,1,0,1
+9,P511808,Zimbabwe Institutions Advisory Support,Republic of Zimbabwe,ASA,2026,2025-10-07T00:00:00Z,1,0,0,0
+10,P510280,Strengthening Public Financial Management II Project,Republic of the Marshall Islands,IPF,2026,2025-08-08T00:00:00Z,1,1,0,1
+11,P512516,Syria Public Financial Management Capacity Strengthening Project,Syrian Arab Republic,IPF,2026,2026-03-05T00:00:00Z,0,1,0,0
+12,P512679,SPF: Foundations for restoring Syria's public financial management systems.,Syrian Arab Republic,ASA,2026,2025-08-11T00:00:00Z,1,0,0,0
+13,P177875,Burkina Faso Local Governance for Basic Services & Resilience Program,Burkina Faso,PforR,2023,2023-05-08T00:00:00Z,0,0,1,1
+14,P174620,CAR- Public Sector Digital Governance Project,Central African Republic,IPF,2022,2022-05-05T00:00:00Z,NA,NA,NA,NA
+15,P501950,Timor-Leste Institutions PASA,Democratic Republic of Timor-Leste,ASA,2025,2025-04-10T00:00:00Z,1,0,0,1
+16,P179405,Ethiopia Governance Advisory and Technical Support,Federal Democratic Republic of Ethiopia,ASA,2023,2022-12-21T00:00:00Z,1,0,1,1
+17,P181066,Strengthening Fiscal Federalism and Municipal Finance in Ethiopia,Federal Democratic Republic of Ethiopia,ASA,2024,2023-12-13T00:00:00Z,1,0,0,0
+18,P169405,"Sustainable Procurement, Environmental and Social Standards Enhancement Project (SPESSE)",Federal Republic of Nigeria,IPF,2020,NA,0,1,0,0
+19,P500428,"Nigeria Transparent, Effective and Accountable Public Institutions (TEA) PASA",Federal Republic of Nigeria,ASA,2024,2023-10-11T00:00:00Z,0,0,0,0
+20,P177308,NG Accelerating Resource Mobilization Reforms PforR,Federal Republic of Nigeria,PforR,2024,2024-06-13T00:00:00Z,1,0,1,1
+21,P510242,"Sustainable Procurement, Environmental and Social Standards Enhancement Project (SPESSE)",Federal Republic of Nigeria,IPF,2025,NA,0,1,0,1
+22,P181476,Nigeria Human Capital Opportunities for Prosperity and Equity (HOPE) - Governance,Federal Republic of Nigeria,PforR,2025,2024-09-26T00:00:00Z,1,0,0,1
+23,P173731,Somalia Recurrent Cost & Reform Financing Project - Phase 3,Federal Republic of Somalia,IPF,2020,NA,1,0,1,0
+24,P177900,Additional Financing for Somalia Recurrent Cost & Reform Financing Project - Phase III,Federal Republic of Somalia,IPF,2022,2022-06-23T00:00:00Z,1,0,1,1
+25,P180586,Somalia Enhanced Procurement Risk Management,Federal Republic of Somalia,ASA,2023,2023-02-07T00:00:00Z,1,0,1,0
+26,P179174,Somalia Governance and Institutions PASA,Federal Republic of Somalia,ASA,2023,2022-09-12T00:00:00Z,1,0,0,0
+27,P181407,Second Additional Financing for Somalia Recurrent Cost and Reform Financing Phase III,Federal Republic of Somalia,IPF,2024,2024-05-21T00:00:00Z,1,0,1,1
+28,P181237,Strengthening Public Financial Management II Project,Federated States of Micronesia,IPF,2025,2025-03-05T00:00:00Z,1,1,0,1
+29,P506443,Mauritania Public Spending Efficiency,Islamic Republic of Mauritania,PforR,2025,2025-06-03T00:00:00Z,1,1,0,1
+30,P171417,Punjab Resource Improvement and Digital Effectiveness,Islamic Republic of Pakistan,PforR,2021,2020-10-22T00:00:00Z,1,0,1,1
+31,P175727,KP- Spending Effectively  for Enhanced Development,Islamic Republic of Pakistan,PforR,2021,2021-04-22T00:00:00Z,1,0,1,1
+32,P507378,Cambodia Governance Programmatic Advisory Services and Analytics,Kingdom of Cambodia,ASA,2025,2025-03-20T00:00:00Z,1,1,0,0
+33,P174171,Lesotho Public Sector Foundations for Service Delivery Project,Kingdom of Lesotho,IPF,2024,2024-01-23T00:00:00Z,1,0,1,1
+34,P179015,Lao PDR Third Programmatic Public Financial Management Reform Program,Lao People's Democratic Republic,ASA,2023,2022-10-20T00:00:00Z,1,0,1,0
+35,P505030,"Improving Performance, Accountability and Transparency in Cameroon PforR",Republic of Cameroon,PforR,2025,2025-03-14T00:00:00Z,1,1,0,1
+36,P176445,PFM for Service Delivery Program,Republic of Ghana,PforR,2022,2022-06-10T00:00:00Z,1,0,1,1
+37,P510239,Building  the Capacity of Parliamentarians for Economic and Financial Governance in Ghana,Republic of Ghana,ASA,2025,2025-06-23T00:00:00Z,1,0,0,0
+38,P179680,Kenya Governance and Green Economy Support Programmatic ASA,Republic of Kenya,ASA,2023,2023-02-17T00:00:00Z,1,0,1,1
+39,P180935,Second Kenya Devolution Support Program,Republic of Kenya,PforR,2024,2023-12-07T00:00:00Z,1,0,1,1
+40,P180287,Second Program for Strengthening Governance for Enabling Service Delivery and Public Investment in Kenya,Republic of Kenya,PforR,2024,2023-11-29T00:00:00Z,1,0,1,1
+41,P164961,Malawi Governance to Enable Service Delivery Project,Republic of Malawi,IPF,2020,NA,0,0,1,1
+42,P181620,Additional Financing for Malawi Governance to Enable Service Delivery,Republic of Malawi,IPF,2024,2024-06-14T00:00:00Z,0,0,0,1
+43,P500811,Malawi Governance and Accountability PASA,Republic of Malawi,ASA,2024,2023-11-13T00:00:00Z,0,0,0,0
+44,P174822,Niger Public Sector Management for Resilience and Service Delivery Program,Republic of Niger,PforR,2022,2022-06-29T00:00:00Z,1,0,0,1
+45,P509601,Niger Food Security and Emergency Access to Essential  Services Project,Republic of Niger,IPF,2025,2025-06-05T00:00:00Z,1,1,0,1
+46,P500797,Rwanda Governance and Decentralization Support PASA,Republic of Rwanda,ASA,2024,2024-01-29T00:00:00Z,1,0,1,0
+47,P510613,Strengthening Senegal?s Fiscal Sustainability Program,Republic of Senegal,PforR,2025,2025-06-24T00:00:00Z,1,1,0,1
+48,P172492,Accountable Governance for Basic Service Delivery,Republic of Sierra Leone,IPF,2021,2021-06-11T00:00:00Z,1,0,1,1
+49,P176761,Public Financial Management and Institutional Strengthening Project,Republic of South Sudan,IPF,2022,2022-02-24T00:00:00Z,1,1,1,0
+50,P180797,South Sudan Programmatic Governance and Public Financial Management Technical Assistance,Republic of South Sudan,ASA,2024,2023-10-12T00:00:00Z,1,0,1,0
+51,P500500,Building Institutional Foundations for an Effective Public Service Project,Republic of South Sudan,IPF,2025,2024-09-03T00:00:00Z,0,0,0,1
+52,P150381,Public Finance Management Modernization Project 2,Republic of Tajikistan,IPF,2015,NA,1,1,1,0
+53,P172924,Additional Financing for Public Finance Management Modernization Project 2,Republic of Tajikistan,IPF,2021,2020-12-02T00:00:00Z,1,1,1,0
+54,P171892,Tax Reform Operation,Republic of Tajikistan,PforR,2021,2021-05-28T00:00:00Z,1,0,0,0
+55,P501226,Improving Public Financial Management to Support Service Delivery in Togo,Republic of Togo,ASA,2024,2023-12-01T00:00:00Z,1,0,0,0
+56,P176883,Togo Public Sector Strengthening for Service Delivery Operation,Republic of Togo,PforR,2024,2024-05-23T00:00:00Z,1,0,1,1
+57,P501663,Uganda Governance Programmatic Advisory Services and Analytics,Republic of Uganda,ASA,2024,2024-02-23T00:00:00Z,0,0,0,0
+58,P173001,Tax Administration Reform Project in Uzbekistan,Republic of Uzbekistan,IPF,2021,2021-06-16T00:00:00Z,1,0,1,0
+59,P506552,Yemen Strengthening Institutions,Republic of Yemen,ASA,2025,2024-12-17T00:00:00Z,0,0,0,0
+60,P178492,Zambia Devolution Support Program,Republic of Zambia,PforR,2022,2022-06-28T00:00:00Z,1,0,1,1
+61,P502030,Zambia Governance for Transformation PASA,Republic of Zambia,ASA,2024,2023-11-15T00:00:00Z,0,0,0,0
+62,P180722,Public Finance Management and Procurement Systems for Service Delivery Program,United Republic of Tanzania,PforR,2024,2024-03-21T00:00:00Z,1,0,1,1
+63,P501890,Tanzania Governance and Public Sector PASA,United Republic of Tanzania,ASA,2024,2023-11-20T00:00:00Z,0,0,0,0
+64,P500588,Zanzibar Judicial Modernization Project (Zi-JUMP),United Republic of Tanzania,IPF,2024,2024-05-10T00:00:00Z,0,0,0,1

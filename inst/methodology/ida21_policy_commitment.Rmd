@@ -20,6 +20,7 @@ library(ggplot2)
 library(ggthemes)
 library(stringr)
 library(tidyr)
+library(here)
 
 devtools::load_all()
 
@@ -33,6 +34,15 @@ wb_lending_gov <- wb_projects_gov |>
 wb_asa_gov <- wb_projects_gov |>
   filter(product_line_type == "Analytic and Advisory Activities Product")
 
+wb_operations_approval <- readr::read_csv(
+  here("data-raw", "input", "standard-report", "Operations_Lending_[FL0904]_PaginatedReport.csv")
+) |> 
+  janitor::clean_names() |> 
+  select(
+    proj_id = project_id2,
+    proj_approval_date = project_milestone_approval_date
+  )
+
 theme_labels <- function(x) {
   case_match(
     x,
@@ -45,11 +55,11 @@ theme_labels <- function(x) {
 }
 ```
 
-# Overview
+<!-- <!-- # Overview
 
 This portfolio review monitors the World Bank Governance Global Practice (GOV) portfolio in IDA-eligible and Blend countries, in support of the IDA21 Policy Commitment on Institutional Strengthening. The portfolio covers active lending operations and Advisory Services and Analytics (ASA) led by the Governance GP. Projects are classified across four thematic areas: Public Financial Management, Public Procurement, Public Administration, and Environmental & Social Governance.
 
-The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**.
+The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**. -->
 
 ```{r overview-tables}
 tibble::tribble(
@@ -61,7 +71,7 @@ tibble::tribble(
 ```
 
 **Note**: Countries are only counted once across lending and ASAs. As such, the total number of countries may be less than the sum of lending and ASA counts if a country is supported both types of operations.
-
+<!-- 
 # Portfolio by IDA cycle
 
 ```{r cycle-tables}
@@ -192,29 +202,54 @@ wb_projects_gov |>
   knitr::kable(caption = "Countries supported by the Governance IDA/Blend portfolio")
 ```
 
-**Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21, and finally, Unassigned).
+**Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21, and finally, Unassigned). -->
 
 # Project list
+List of lending projects/ASA in the Governance IDA/Blend portfolio
 
 ```{r project-list}
-wb_projects_gov |>
+project_list <- wb_projects_gov |>
+  left_join(
+    wb_operations_approval,
+    by = "proj_id"
+  ) |> 
   mutate(
     approval_year      = if_else(
       product_line_type == "Lending Product",
       as.character(proj_approval_fy),
-      as.character(lubridate::year(asa_approval_date))
+      as.character(compute_fy(asa_approval_date))
     ),
-    `Product Line`     = if_else(product_line_type == "Lending Product", "Lending", "ASA"),
+    `Instrument Type`     = if_else(product_line_type != "Lending Product", "ASA", lending_instrument),
     ida_cycle_approval = replace_na(ida_cycle_approval, "Unassigned")
   ) |>
-  select(
+  transmute(
     `Project ID`    = proj_id,
     `Project Name`  = proj_name,
     `Country`       = country_name,
-    `Product Line`,
-    `Approval Year` = approval_year,
-    `IDA Cycle`     = ida_cycle_approval
+    `Instrument Type`,
+    `Approval Fiscal Year` = approval_year,
+    `Approval Date` = coalesce(asa_approval_date, lubridate::dmy(proj_approval_date)),
+    `IDA Cycle`     = ida_cycle_approval,
+    `PFM project` = theme_pfm,
+    `Procurement project` = theme_procurement,
+    `Public Administration project` = theme_public_admin,
+    `Environmental and Social project` = theme_env_social
   ) |>
   arrange(`IDA Cycle`, `Country`) |>
+  select(-`IDA Cycle`) |>
+  mutate(
+    `Project Count` = row_number()
+  ) |> 
+  select(
+    `Project Count`,
+    everything()
+  ) 
+  
+project_list |> 
   knitr::kable(caption = "List of operations in the Governance IDA/Blend portfolio")
+
+project_list |> 
+  readr::write_csv(
+    here("inst", "extdata", "ida_project_list.csv")
+  )
 ```
