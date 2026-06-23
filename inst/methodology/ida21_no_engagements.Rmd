@@ -45,4 +45,6 @@ wb_country_ida_no_gov <- wb_country_ida |>
         wb_projects_gov,
         by = c("country_code")
     )
+
+cliaretl::
 ```
