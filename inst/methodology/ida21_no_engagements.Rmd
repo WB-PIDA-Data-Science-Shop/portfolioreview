@@ -110,7 +110,7 @@ wb_country_ida_gov <- wb_country_ida_gov |>
 ```
 
 # Plot 1. Comparative analysis of CPIA scores between IDA countries with/without GOV engagements
-```{r, fig.width = 18, fig.height = 8}
+```{r, fig.width = 18, fig.height = 10}
 wb_country_ida_gov |> 
     filter(
         gov_engagement == "No GOV operational engagement"
@@ -132,8 +132,11 @@ wb_country_ida_gov |>
         aes(label = round(value, 1)),
         hjust = -0.5
     ) +
+    scale_y_discrete(labels = function(x) str_wrap(x, width = 30)) +
     labs(
         x = "CPIA score",
         y = ""
     )
+
+ggsave("inst/methodology/ida_cpia_scores.png", width = 18, height = 10)
 ```
