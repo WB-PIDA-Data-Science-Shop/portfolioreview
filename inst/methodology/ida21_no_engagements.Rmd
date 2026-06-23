@@ -25,10 +25,16 @@ library(here)
 
 devtools::load_all()
 
-theme_set(theme_minimal())
+theme_set(theme_minimal(base_size = 20))
 
-wb_projects_gov <- portfolioreview::wb_projects_gov
+# identify IDA countries with GOV operations (lending or ASA)
+ida_countries_with_gov <- portfolioreview::wb_projects_gov |> 
+    distinct(country_code) |> 
+    mutate(
+        gov_engagement = "Has GOV operational engagement"
+    )
 
+# identify universe of IDA countries
 wb_country_ida <- portfolioreview::wb_country_list |> 
   distinct(country_code, country_name) |> 
   left_join(
@@ -38,13 +44,96 @@ wb_country_ida <- portfolioreview::wb_country_list |>
   filter(
     lending_category %in% c("IDA", "Blend")
   ) |> 
-  select(country_code, lending_category)
+  select(country_code, country_name, lending_category)
 
-wb_country_ida_no_gov <- wb_country_ida |> 
-    anti_join(
-        wb_projects_gov,
+# classify IDA country as having/not GOV operation
+wb_country_ida_gov <- wb_country_ida |> 
+    left_join(
+        ida_countries_with_gov,
         by = c("country_code")
+    ) |> 
+    replace_na(
+        list(gov_engagement = "No GOV operational engagement")
     )
 
-cliaretl::
+cpia_indicators <- cliaretl::wdi_indicators |> 
+    select(
+        country_code,
+        year,
+        starts_with("wdi_iqc")
+    ) |> 
+    filter(
+        year == 2024
+    ) 
+    
+# rename colnames
+cpia_vars <- cliaretl::db_variables_final |> 
+    filter(
+        stringr::str_detect(variable, "^wdi_iqc")
+    ) |> 
+    select(
+        var_name,
+        variable
+    )
+
+cpia_names <- cpia_vars$variable %>%
+    purrr::set_names(
+        cpia_vars$var_name
+    )
+
+cpia_indicators <- cpia_indicators |> 
+    rename(
+        !!!cpia_names
+    ) |> 
+    rename_with(
+        \(col) str_replace(col, "Cpia", "CPIA")
+    ) |> 
+    rename_with(
+        \(col) str_remove(col, " \\(1=low to 6=high\\)")
+    )
+
+# add cpia scores
+wb_country_ida_gov <- wb_country_ida_gov |> 
+    left_join(
+        cpia_indicators,
+        by = c("country_code")
+    ) |> 
+    select(
+        country_code,
+        gov_engagement,
+        "CPIA public sector management and institutions cluster average",
+        "CPIA quality of budgetary and financial management rating",
+        "CPIA policy and institutions for environmental sustainability rating",
+        "CPIA policies for social inclusion/equity cluster average",
+        "CPIA transparency, accountability, and corruption in the public sector rating"
+    )
+```
+
+# Plot 1. Comparative analysis of CPIA scores between IDA countries with/without GOV engagements
+```{r}
+wb_country_ida_gov |> 
+    filter(
+        gov_engagement == "No GOV operational engagement"
+    ) |> 
+    summarise(
+        across(
+            c(starts_with("CPIA")),
+            \(x) mean(x, na.rm = TRUE)
+        )
+    ) |> 
+    pivot_longer(
+        cols = starts_with("CPIA")
+    ) |> 
+    ggplot(
+        aes(value, name)
+    ) +
+    geom_col() +
+    geom_text(
+        aes(label = round(value, 1)),
+        hjust = -0.5
+    ) +
+    labs(
+        x = "CPIA score",
+        y = ""
+    )
 ```
