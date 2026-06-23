@@ -199,6 +199,7 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     proj_name,
     pdo,
     region,
+    country_code,
     country_name,
     proj_approval_fy,
     asa_approval_date,

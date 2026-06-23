@@ -1,0 +1,48 @@
+---
+title: "IDA21 Policy Commitment: Institutional Strengthening"
+subtitle: "IDA countries without operational engagements"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document:
+    reference_docx: null
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 8,
+  fig.height = 5
+)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(stringr)
+library(tidyr)
+library(here)
+
+devtools::load_all()
+
+theme_set(theme_minimal())
+
+wb_projects_gov <- portfolioreview::wb_projects_gov
+
+wb_country_ida <- portfolioreview::wb_country_list |> 
+  distinct(country_code, country_name) |> 
+  left_join(
+    portfolioreview::wb_income_and_region |> select(country_code, lending_category),
+    by = "country_code"
+  ) |> 
+  filter(
+    lending_category %in% c("IDA", "Blend")
+  ) |> 
+  select(country_code, lending_category)
+
+wb_country_ida_no_gov <- wb_country_ida |> 
+    anti_join(
+        wb_projects_gov,
+        by = c("country_code")
+    )
+```
