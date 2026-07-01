@@ -41,6 +41,18 @@ wb_projects_gov <- portfolioreview::wb_projects |>
     by = c("proj_id" = "Project ID")
   )
 
+wb_projects_gov_pipeline <- portfolioreview::wb_projects |> 
+  filter(
+      proj_status == "Pipeline" &
+      (lead_gp == "GOV") & 
+      (agreement_type != "RETF" | is.na(agreement_type))
+  ) |> 
+  # only IDA and blend countries
+  inner_join(
+    wb_country_ida,
+    by = c("country_code")
+  )
+
 # classify projects based on themes --------------------------------------
 gov_pc_themes <- portfolioreview::wb_project_themes |> 
   mutate(
