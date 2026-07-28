@@ -78,11 +78,6 @@ wb_projects <- wb_projects |>
     agreement_type = agrmnt_type_code,
     commitment_amount = cmt_amt
   ) |> 
-  filter(
-    proj_status %in% c("Active", "Pipeline") & # add an additional filter to include projects that are closed within the IDA 21 cycle
-      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product") &
-      proj_approval_fy > 0
-  ) |>
   # fix country code
   left_join(
     country_list |> select(country_code = cntry_cde, country_code_clean = iso3_cntry_cde),
@@ -97,10 +92,6 @@ wb_projects <- wb_projects |>
     asa_active_details,
     by = "proj_id"
   ) |> 
-  # drop ASAs without an AIN or CN approval date
-  filter(
-    !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
-  ) |>
   # fix approval FY for ASAs
   mutate(
     proj_approval_fy = if_else(
@@ -108,6 +99,14 @@ wb_projects <- wb_projects |>
       compute_fy(asa_approval_date),
       proj_approval_fy
     )
+  )
+
+# filter projects that do not meet inclusion criteria
+wb_projects <- wb_projects |> 
+  filter(
+    proj_status %in% c("Active", "Pipeline", "Closed") &
+      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product") &
+      proj_approval_fy > 0
   )
 
 usethis::use_data(wb_projects, overwrite = TRUE)

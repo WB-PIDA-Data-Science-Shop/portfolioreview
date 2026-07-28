@@ -10,7 +10,6 @@ devtools::load_all()
 
 # to-do:
 # include the ECA CGJR: P516999
-# inspect the list provided by SAR:
 
 # read-in data -----------------------------------------------------------
 wb_country_ida <- portfolioreview::wb_country_list |>
@@ -36,6 +35,10 @@ wb_projects_gov <- portfolioreview::wb_projects |>
       (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
       (agreement_type != "RETF" | is.na(agreement_type))
   ) |>
+  # drop ASAs without an AIN or CN approval date
+  filter(
+    !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
+  ) |> 
   # only IDA and blend countries
   inner_join(
     wb_country_ida,
@@ -86,9 +89,22 @@ regional_inputs_ids <- regional_inputs |>
       "^PPA"
     )
   ) |> 
-  pull(p_code)
+  select(
+    proj_id = p_code
+  )
 
 # retrieve information from original wb_projects
+regional_projects <- regional_inputs_ids |> 
+  inner_join(
+    portfolioreview::wb_projects,
+    by = "proj_id"
+  )
+
+regional_projects_not_found <- regional_inputs_ids |>
+  anti_join(
+    portfolioreview::wb_projects,
+    by = "proj_id"
+  )
 
 # classify projects based on themes --------------------------------------
 gov_pc_themes <- portfolioreview::wb_project_themes |>
