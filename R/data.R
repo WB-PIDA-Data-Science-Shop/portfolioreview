@@ -58,11 +58,11 @@
 #' A tibble of World Bank lending and advisory operations filtered to those
 #' led by or contributing to the Governance (GOV) Global Practice.
 #'
-#' @format A tibble with 4,717 rows and 16 columns:
+#' @format A tibble with 24,339 rows and 19 columns:
 #' \describe{
 #'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 #'   \item{proj_name}{Character. Display name of the project.}
-#'   \item{proj_status}{Character. Current project status: \"Active\" or \"Pipeline\".}
+#'   \item{proj_status}{Character. Current project status: \"Active\", \"Pipeline\", or \"Closed\".}
 #'   \item{pdo}{Character. Project Development Objective description.}
 #'   \item{proj_approval_fy}{Double. Fiscal year in which the project was approved.}
 #'   \item{proj_url}{Character. URL to the project page on the World Bank Operations Portal.}
@@ -87,7 +87,7 @@
 #'
 #' @details
 #' Filtered to operations where:
-#' - `proj_status` is \"Active\" or \"Pipeline\"
+#' - `proj_status` is \"Active\", \"Pipeline\", or \"Closed\"
 #' - `product_line_type` is \"Lending Product\" or \"Analytic and Advisory Activities Product\"
 #'
 #' Country codes are sourced from the World Bank COUNTRY reference dataset and joined on
