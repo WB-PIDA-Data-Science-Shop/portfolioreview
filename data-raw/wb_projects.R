@@ -79,9 +79,7 @@ wb_projects <- wb_projects |>
     commitment_amount = cmt_amt
   ) |> 
   filter(
-    proj_status %in% c("Active", "Pipeline") &
-      # only retain operations that are either GOV led or contributed to by GOV
-      (str_detect(lead_gp, "GOV") |str_detect(contrib_gp, "GOV")) &
+    proj_status %in% c("Active", "Pipeline") & # add an additional filter to include projects that are closed within the IDA 21 cycle
       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product") &
       proj_approval_fy > 0
   ) |>

@@ -58,7 +58,7 @@
 #' A tibble of World Bank lending and advisory operations filtered to those
 #' led by or contributing to the Governance (GOV) Global Practice.
 #'
-#' @format A tibble with 796 rows and 16 columns:
+#' @format A tibble with 4,717 rows and 16 columns:
 #' \describe{
 #'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 #'   \item{proj_name}{Character. Display name of the project.}
@@ -88,7 +88,6 @@
 #' @details
 #' Filtered to operations where:
 #' - `proj_status` is \"Active\" or \"Pipeline\"
-#' - The Governance GP (`GOV`) is either the lead (`lead_gp`) or a contributing practice (`contrib_gp`)
 #' - `product_line_type` is \"Lending Product\" or \"Analytic and Advisory Activities Product\"
 #'
 #' Country codes are sourced from the World Bank COUNTRY reference dataset and joined on

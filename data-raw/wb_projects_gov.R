@@ -32,7 +32,8 @@ projects_ida_20 <- read.csv(
 wb_projects_gov <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Active" &
-      (lead_gp == "GOV" | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
+      # only retain operations that are GOV led
+      (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
       (agreement_type != "RETF" | is.na(agreement_type))
   ) |>
   # only IDA and blend countries
@@ -45,23 +46,6 @@ wb_projects_gov <- portfolioreview::wb_projects |>
     projects_ida_20,
     by = c("proj_id")
   )
-
-wb_projects_gov_sar <- as_tibble(
-  list(
-    proj_id = c(
-      "P506691",
-      "P502876",
-      "P511201",
-      "P167491",
-      "P502876",
-      "P509816",
-      "P512154",
-      "P513808",
-      "P170688"
-    )
-  )
-)
-
 wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Pipeline" &
@@ -73,6 +57,38 @@ wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
     wb_country_ida,
     by = c("country_code")
   )
+
+# include projects from MTR regional validation --------------------------
+# validation conducted during the MTR exercise in July, 2026
+regional_inputs <- fs::dir_ls(
+  here("data-raw", "input", "regional-validation"),
+  glob = "*.xlsx"
+) |> 
+  purrr::map_dfr(
+    \(file) openxlsx::read.xlsx(file, startRow = 8)
+  ) |> 
+  janitor::clean_names()
+
+# only retain projects which are to be included
+regional_inputs <- regional_inputs |>
+  filter(
+    str_detect(
+      comments_by_global_focal_point,
+      "Included"
+    )
+  )
+
+regional_inputs_ids <- regional_inputs |> 
+  filter(
+    !str_detect(
+      p_code,
+      # exclude PPA
+      "^PPA"
+    )
+  ) |> 
+  pull(p_code)
+
+# retrieve information from original wb_projects
 
 # classify projects based on themes --------------------------------------
 gov_pc_themes <- portfolioreview::wb_project_themes |>
