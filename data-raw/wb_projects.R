@@ -92,11 +92,12 @@ wb_projects <- wb_projects |>
     asa_active_details,
     by = "proj_id"
   ) |> 
-  # fix approval FY for ASAs
+  # fix approval FY for ASAs because in the master file
+  # the approval_fy denoted the expected end of an ASA
   mutate(
     proj_approval_fy = if_else(
       product_line_type == "Analytic and Advisory Activities Product",
-      compute_fy(asa_approval_date),
+      coalesce(compute_fy(asa_approval_date), proj_approval_fy),
       proj_approval_fy
     )
   )

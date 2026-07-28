@@ -58,7 +58,7 @@
 #' A tibble of World Bank lending and advisory operations filtered to those
 #' led by or contributing to the Governance (GOV) Global Practice.
 #'
-#' @format A tibble with 24,339 rows and 19 columns:
+#' @format A tibble with 60,446 rows and 19 columns:
 #' \describe{
 #'   \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 #'   \item{proj_name}{Character. Display name of the project.}

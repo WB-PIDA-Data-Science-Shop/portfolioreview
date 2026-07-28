@@ -33,12 +33,13 @@ wb_projects_gov <- portfolioreview::wb_projects |>
     proj_status == "Active" &
       # only retain operations that are GOV led
       (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
-      (agreement_type != "RETF" | is.na(agreement_type))
+      (agreement_type != "RETF" | is.na(agreement_type)) &
+      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
   ) |>
   # drop ASAs without an AIN or CN approval date
   filter(
     !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
-  ) |> 
+  ) |>
   # only IDA and blend countries
   inner_join(
     wb_country_ida,
@@ -49,11 +50,13 @@ wb_projects_gov <- portfolioreview::wb_projects |>
     projects_ida_20,
     by = c("proj_id")
   )
+
 wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Pipeline" &
       (lead_gp == "GOV") &
-      (agreement_type != "RETF" | is.na(agreement_type))
+      (agreement_type != "RETF" | is.na(agreement_type)) &
+      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
   ) |>
   # only IDA and blend countries
   inner_join(
