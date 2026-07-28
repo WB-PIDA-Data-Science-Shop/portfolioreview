@@ -103,6 +103,7 @@ regional_projects <- regional_inputs_ids |>
     by = "proj_id"
   )
 
+# only missing the project for the CGJR in Kosovo (new)
 regional_projects_not_found <- regional_inputs_ids |>
   anti_join(
     portfolioreview::wb_projects,

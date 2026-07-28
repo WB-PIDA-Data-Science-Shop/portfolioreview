@@ -5,7 +5,7 @@
 \alias{wb_projects}
 \title{World Bank Operations: Governance Portfolio}
 \format{
-A tibble with 24,339 rows and 19 columns:
+A tibble with 60,446 rows and 19 columns:
 \describe{
 \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 \item{proj_name}{Character. Display name of the project.}
