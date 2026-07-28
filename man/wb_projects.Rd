@@ -5,7 +5,7 @@
 \alias{wb_projects}
 \title{World Bank Operations: Governance Portfolio}
 \format{
-A tibble with 796 rows and 16 columns:
+A tibble with 4,717 rows and 16 columns:
 \describe{
 \item{proj_id}{Character. Unique World Bank project identifier (e.g., \"P123456\").}
 \item{proj_name}{Character. Display name of the project.}
@@ -47,7 +47,6 @@ led by or contributing to the Governance (GOV) Global Practice.
 Filtered to operations where:
 \itemize{
 \item \code{proj_status} is \"Active\" or \"Pipeline\"
-\item The Governance GP (\code{GOV}) is either the lead (\code{lead_gp}) or a contributing practice (\code{contrib_gp})
 \item \code{product_line_type} is \"Lending Product\" or \"Analytic and Advisory Activities Product\"
 }
 
