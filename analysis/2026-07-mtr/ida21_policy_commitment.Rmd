@@ -64,13 +64,13 @@ theme_labels <- function(x) {
 
 This portfolio review monitors the World Bank Governance Global Practice (GOV) portfolio in IDA-eligible and Blend countries, in support of the IDA21 Policy Commitment on Institutional Strengthening. The portfolio covers active lending operations and Advisory Services and Analytics (ASA) led by the Governance GP. Projects are classified across four thematic areas: Public Financial Management, Public Procurement, Public Administration, and Environmental & Social Governance.
 
-The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**.
+The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_code)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**.
 
 ```{r overview-tables}
 tibble::tribble(
   ~Metric,     ~Lending,                                ~ASA,                              ~Total,
   "Projects",  nrow(wb_lending_gov),                    nrow(wb_asa_gov),                  nrow(wb_projects_gov),
-  "Countries", n_distinct(wb_lending_gov$country_name), n_distinct(wb_asa_gov$country_name), n_distinct(wb_projects_gov$country_name)
+  "Countries", n_distinct(wb_lending_gov$country_code), n_distinct(wb_asa_gov$country_code), n_distinct(wb_projects_gov$country_code)
 ) |>
   knitr::kable(caption = "Governance IDA/Blend portfolio: summary")
 ```
@@ -94,11 +94,11 @@ cycle_projects <- cycle_base |>
   rename(`IDA Cycle` = ida_cycle_approval)
 
 cycle_countries <- cycle_base |>
-  summarise(n = n_distinct(country_name), .by = c(ida_cycle_approval, product_line)) |>
+  summarise(n = n_distinct(country_code), .by = c(ida_cycle_approval, product_line)) |>
   pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
   left_join(
     cycle_base |>
-      summarise(Total = n_distinct(country_name), .by = ida_cycle_approval),
+      summarise(Total = n_distinct(country_code), .by = ida_cycle_approval),
     by = "ida_cycle_approval"
   ) |>
   arrange(ida_cycle_approval) |>
@@ -156,11 +156,11 @@ theme_base |>
   knitr::kable(caption = "Number of projects by thematic area and product line")
 
 theme_base |>
-  summarise(n = n_distinct(country_name), .by = c(theme, product_line)) |>
+  summarise(n = n_distinct(country_code), .by = c(theme, product_line)) |>
   pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
   left_join(
     theme_base |>
-      summarise(Total = n_distinct(country_name), .by = theme),
+      summarise(Total = n_distinct(country_code), .by = theme),
     by = "theme"
   ) |>
   arrange(desc(Total)) |>
@@ -196,11 +196,11 @@ theme_cycle_base |>
   knitr::kable(caption = "Number of projects by thematic area and IDA cycle")
 
 theme_cycle_base |>
-  summarise(n = n_distinct(country_name), .by = c(theme, ida_cycle_approval)) |>
+  summarise(n = n_distinct(country_code), .by = c(theme, ida_cycle_approval)) |>
   pivot_wider(names_from = ida_cycle_approval, values_from = n, values_fill = 0) |>
   left_join(
     theme_cycle_base |>
-      summarise(Total = n_distinct(country_name), .by = theme),
+      summarise(Total = n_distinct(country_code), .by = theme),
     by = "theme"
   ) |>
   arrange(desc(Total)) |>
