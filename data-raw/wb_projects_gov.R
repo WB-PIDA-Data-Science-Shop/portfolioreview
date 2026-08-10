@@ -1,5 +1,5 @@
 ## code to prepare `wb_projects_gov` dataset goes here
-# date: 7/3/2026
+# date: 8/10/2026
 # set-up -----------------------------------------------------------------
 library(dplyr)
 library(stringr)
@@ -7,9 +7,6 @@ library(readr)
 library(here)
 
 devtools::load_all()
-
-# to-do:
-# include the ECA CGJR: P516999
 
 # read-in data -----------------------------------------------------------
 wb_country_ida <- portfolioreview::wb_country_list |>
@@ -28,28 +25,35 @@ projects_ida_20 <- read.csv(
   here("data-raw", "input", "ida-20", "consolidated_project_codes.csv")
 )
 
-wb_projects_gov <- portfolioreview::wb_projects |>
-  filter(
-    proj_status == "Active" &
-      # only retain operations that are GOV led
-      (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
-      (agreement_type != "RETF" | is.na(agreement_type)) &
-      product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
-  ) |>
-  # drop ASAs without an AIN or CN approval date
-  filter(
-    !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
-  ) |>
-  # only IDA and blend countries
-  inner_join(
-    wb_country_ida,
-    by = c("country_code")
-  ) |>
-  # exclude ida-20 projects that were already approved in the previous cycle
-  anti_join(
-    projects_ida_20,
-    by = c("proj_id")
-  )
+# wb_projects_gov <- portfolioreview::wb_projects |>
+#   filter(
+#     proj_status == "Active" & # this filter is problematic: we need to also allow through projects that were closed during the IDA21 cycle
+#       # only retain operations that are GOV led
+#       (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
+#       (agreement_type != "RETF" | is.na(agreement_type)) &
+#       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
+#   ) |>
+#   # drop ASAs without an AIN or CN approval date
+#   filter(
+#     !(is.na(asa_approval_date) & product_line_type == "Analytic and Advisory Activities Product")
+#   ) |>
+#   # only IDA and blend countries
+#   inner_join(
+#     wb_country_ida,
+#     by = c("country_code")
+#   ) |>
+#   # exclude ida-20 projects that were already approved in the previous cycle
+#   anti_join(
+#     projects_ida_20,
+#     by = c("proj_id")
+#   )
+
+# for now, only retain the original 64 projects which were extracted in April
+# since those were the basis for the MTR validation
+wb_projects_gov <- read_rds(
+  here("inst", "extdata", "snapshot", "wb_projects_gov_20260810.rds")
+) |>
+  select(proj_id)
 
 wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
@@ -66,49 +70,47 @@ wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
 
 # include projects from MTR regional validation --------------------------
 # validation conducted during the MTR exercise in July, 2026
+# the final list has been validated by DE (development effectiveness)
 regional_inputs <- fs::dir_ls(
-  here("data-raw", "input", "regional-validation"),
+  here("data-raw", "input", "regional-validation", "2026-07-mtr", "de"),
   glob = "*.xlsx"
 ) |> 
   purrr::map_dfr(
-    \(file) openxlsx::read.xlsx(file, startRow = 8)
+    \(file) openxlsx::read.xlsx(file, startRow = 3)
   ) |> 
   janitor::clean_names()
-
-# only retain projects which are to be included
-regional_inputs <- regional_inputs |>
-  filter(
-    str_detect(
-      comments_by_global_focal_point,
-      "Included"
-    )
-  )
 
 regional_inputs_ids <- regional_inputs |> 
   filter(
     !str_detect(
       p_code,
       # exclude PPA
-      "^PPA"
+      "^N/A"
     )
   ) |> 
   select(
     proj_id = p_code
   )
 
+# identify regional validation inputs that were added
+regional_inputs_added <- regional_inputs_ids |>
+  anti_join(
+    wb_projects_gov,
+    by = "proj_id"
+  )
+
 # retrieve information from original wb_projects
-regional_projects <- regional_inputs_ids |> 
+regional_projects <- regional_inputs_added |> 
   inner_join(
     portfolioreview::wb_projects,
     by = "proj_id"
   )
 
-# only missing the project for the CGJR in Kosovo (new)
-regional_projects_not_found <- regional_inputs_ids |>
-  anti_join(
-    portfolioreview::wb_projects,
-    by = "proj_id"
-  )
+# combine original gov projects and regional validation ------------------
+wb_projects_gov <- bind_rows(
+  wb_projects_gov,
+  regional_projects
+)
 
 # classify projects based on themes --------------------------------------
 gov_pc_themes <- portfolioreview::wb_project_themes |>

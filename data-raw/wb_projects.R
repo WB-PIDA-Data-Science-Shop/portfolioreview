@@ -8,22 +8,22 @@ library(here)
 devtools::load_all()
 
 # extracted from https://dataexplorer.worldbank.org/data/details?id=DS04442&t=Preview%20Data
-# on: 2026-04-21
+# on: 2026-08-10
 wb_projects <- read_csv(
   here(
     "data-raw", "input", "wb-data-explorer",
-    "PROJECT_MASTER_V3_04_21_2026.csv"
+    "PROJECT_MASTER_V3_08_10_2026.csv"
   ),
   skip = 4
 ) |>
   janitor::clean_names()
 
 # extracted from https://dataexplorer.worldbank.org/data/details?id=DS04532&t=Preview%20Data
-# on: 2026-04-22
+# on: 2026-08-10
 country_list <- read_csv(
   here(
     "data-raw", "input", "wb-data-explorer",
-    "COUNTRY_04_22_2026.csv"
+    "COUNTRY_08_10_2026.csv"
   ),
   skip = 4
 ) |>
@@ -35,7 +35,7 @@ country_list <- read_csv(
   distinct(cntry_cde, iso3_cntry_cde)
 
 # extracted from https://standardreports.worldbank.org/reports/ASA/A0801
-# on: 5-12-2026
+# on: 2026-08-10
 asa_active_details <- readxl::read_xlsx(
   here("data-raw", "input", "standard-report", "A8.1 ASA Activity Details - Active.xlsx")
 ) |> 
