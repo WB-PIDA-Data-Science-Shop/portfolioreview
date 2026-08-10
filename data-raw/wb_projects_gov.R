@@ -122,6 +122,13 @@ wb_projects_gov_duplicate <- wb_projects_gov |>
   tidyr::separate_rows(
     country_name,
     sep = " and "
+  ) |>
+  mutate(
+    country_name = case_when(
+      country_name == "Bangladesh" ~ "People's Republic of Bangladesh",
+      country_name == "Bhutan" ~ "Kingdom of Bhutan",
+      T ~ country_name
+    )
   )
 
 wb_projects_gov <- wb_projects_gov |>

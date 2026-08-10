@@ -110,6 +110,28 @@ knitr::kable(cycle_countries, caption = "Number of distinct countries by IDA cyc
 
 **Note**: Countries are only counted once across lending and ASAs. As such, the total number of countries may be less than the sum of lending and ASA counts if a country is supported both types of operations.
 
+# List of countries supported in each IDA Cycle
+
+```{r}
+cycle_base |>
+  distinct(
+    country_name, ida_cycle_approval
+  ) |>
+  arrange(ida_cycle_approval, country_name) |>
+  group_by(
+    ida_cycle_approval
+  ) |>
+  mutate(
+    Number = row_number()
+  ) |>
+  rename(
+    "Number" = Number,
+    "Country" = country_name,
+    "IDA Cycle" = ida_cycle_approval
+  ) |>
+  knitr::kable(caption = "List of countries supported in each IDA cycle")
+```
+
 # Portfolio by Thematic Area
 
 ```{r overview-theme-tables}
