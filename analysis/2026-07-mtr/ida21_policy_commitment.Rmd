@@ -1,0 +1,255 @@
+---
+title: "IDA21 Policy Commitment: Institutional Strengthening"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  word_document:
+    reference_docx: null
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 8,
+  fig.height = 5
+)
+
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(stringr)
+library(tidyr)
+library(here)
+
+devtools::load_all()
+
+theme_set(theme_minimal())
+
+wb_projects_gov <- portfolioreview::wb_projects_gov
+
+wb_lending_gov <- wb_projects_gov |>
+  filter(product_line_type == "Lending Product")
+
+wb_asa_gov <- wb_projects_gov |>
+  filter(product_line_type == "Analytic and Advisory Activities Product")
+
+wb_operations_approval <- readr::read_csv(
+  here("data-raw", "input", "standard-report", "Operations_Lending_[FL0904]_PaginatedReport.csv")
+) |> 
+  janitor::clean_names() |> 
+  select(
+    proj_id = project_id2,
+    proj_approval_date = project_milestone_approval_date
+  )
+
+theme_labels <- function(x) {
+  case_match(
+    x,
+    "pfm"                  ~ "Public Financial Management",
+    "procurement"          ~ "Public Procurement",
+    "public_admin"         ~ "Public Administration",
+    "env_social"           ~ "Environmental & Social",
+    "environmental_social" ~ "Environmental & Social"
+  )
+}
+```
+
+<!-- <!-- # Overview
+
+This portfolio review monitors the World Bank Governance Global Practice (GOV) portfolio in IDA-eligible and Blend countries, in support of the IDA21 Policy Commitment on Institutional Strengthening. The portfolio covers active lending operations and Advisory Services and Analytics (ASA) led by the Governance GP. Projects are classified across four thematic areas: Public Financial Management, Public Procurement, Public Administration, and Environmental & Social Governance.
+
+The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**. -->
+
+```{r overview-tables}
+tibble::tribble(
+  ~Metric,     ~Lending,                                ~ASA,                              ~Total,
+  "Projects",  nrow(wb_lending_gov),                    nrow(wb_asa_gov),                  nrow(wb_projects_gov),
+  "Countries", n_distinct(wb_lending_gov$country_name), n_distinct(wb_asa_gov$country_name), n_distinct(wb_projects_gov$country_name)
+) |>
+  knitr::kable(caption = "Governance IDA/Blend portfolio: summary")
+```
+
+**Note**: Countries are only counted once across lending and ASAs. As such, the total number of countries may be less than the sum of lending and ASA counts if a country is supported both types of operations.
+<!-- 
+# Portfolio by IDA cycle
+
+```{r cycle-tables}
+cycle_base <- wb_projects_gov |>
+  mutate(
+    product_line       = if_else(product_line_type == "Lending Product", "Lending", "ASA"),
+    ida_cycle_approval = replace_na(ida_cycle_approval, "Unassigned")
+  )
+
+cycle_projects <- cycle_base |>
+  count(ida_cycle_approval, product_line) |>
+  pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
+  mutate(Total = ASA + Lending) |>
+  arrange(ida_cycle_approval) |>
+  rename(`IDA Cycle` = ida_cycle_approval)
+
+cycle_countries <- cycle_base |>
+  summarise(n = n_distinct(country_name), .by = c(ida_cycle_approval, product_line)) |>
+  pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
+  left_join(
+    cycle_base |>
+      summarise(Total = n_distinct(country_name), .by = ida_cycle_approval),
+    by = "ida_cycle_approval"
+  ) |>
+  arrange(ida_cycle_approval) |>
+  rename(`IDA Cycle` = ida_cycle_approval)
+
+knitr::kable(cycle_projects,  caption = "Number of projects by IDA cycle")
+knitr::kable(cycle_countries, caption = "Number of distinct countries by IDA cycle")
+```
+
+**Note**: Countries are only counted once across lending and ASAs. As such, the total number of countries may be less than the sum of lending and ASA counts if a country is supported both types of operations.
+
+# Portfolio by Thematic Area
+
+```{r overview-theme-tables}
+theme_base <- wb_projects_gov |>
+  mutate(
+    product_line = if_else(product_line_type == "Lending Product", "Lending", "ASA")
+  ) |>
+  pivot_longer(
+    cols      = c(theme_pfm, theme_procurement, theme_public_admin, theme_env_social),
+    names_to  = "theme",
+    values_to = "flag"
+  ) |>
+  filter(flag == 1) |>
+  mutate(theme = theme_labels(str_remove(theme, "theme_")))
+
+theme_base |>
+  count(theme, product_line) |>
+  pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
+  mutate(Total = ASA + Lending) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of projects by thematic area and product line")
+
+theme_base |>
+  summarise(n = n_distinct(country_name), .by = c(theme, product_line)) |>
+  pivot_wider(names_from = product_line, values_from = n, values_fill = 0) |>
+  left_join(
+    theme_base |>
+      summarise(Total = n_distinct(country_name), .by = theme),
+    by = "theme"
+  ) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of distinct countries by thematic area and product line")
+```
+
+**Note**: Projects and countries may appear in more than one thematic area. Country totals are distinct within each theme; the Total column may be less than the sum of Lending and ASA if a country is supported by both.
+
+## By IDA cycle
+
+```{r theme-cycle-tables}
+cycle_order <- c("IDA21", "Pre-IDA21", "Unassigned")
+
+theme_cycle_base <- wb_projects_gov |>
+  mutate(
+    ida_cycle_approval = factor(replace_na(ida_cycle_approval, "Unassigned"), levels = cycle_order)
+  ) |>
+  pivot_longer(
+    cols      = c(theme_pfm, theme_procurement, theme_public_admin, theme_env_social),
+    names_to  = "theme",
+    values_to = "flag"
+  ) |>
+  filter(flag == 1) |>
+  mutate(theme = theme_labels(str_remove(theme, "theme_")))
+
+theme_cycle_base |>
+  count(theme, ida_cycle_approval) |>
+  pivot_wider(names_from = ida_cycle_approval, values_from = n, values_fill = 0) |>
+  mutate(Total = rowSums(across(where(is.integer)))) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of projects by thematic area and IDA cycle")
+
+theme_cycle_base |>
+  summarise(n = n_distinct(country_name), .by = c(theme, ida_cycle_approval)) |>
+  pivot_wider(names_from = ida_cycle_approval, values_from = n, values_fill = 0) |>
+  left_join(
+    theme_cycle_base |>
+      summarise(Total = n_distinct(country_name), .by = theme),
+    by = "theme"
+  ) |>
+  arrange(desc(Total)) |>
+  rename(`Thematic Area` = theme) |>
+  knitr::kable(caption = "Number of distinct countries by thematic area and IDA cycle")
+```
+
+**Note**: Projects and countries may appear in more than one thematic area. Country totals in the Total column are distinct across all IDA cycles.
+
+# Country list
+
+```{r country-list}
+cycle_order <- c("IDA21", "Pre-IDA21", "Unassigned")
+
+wb_projects_gov |>
+  mutate(
+    ida_cycle_approval = replace_na(ida_cycle_approval, "Unassigned"),
+    ida_cycle_approval = factor(ida_cycle_approval, levels = cycle_order)
+  ) |>
+  summarise(
+    `IDA Cycle` = as.character(first(sort(ida_cycle_approval))),
+    .by = country_name
+  ) |>
+  arrange(`IDA Cycle`, country_name) |>
+  rename(`Country` = country_name) |>
+  knitr::kable(caption = "Countries supported by the Governance IDA/Blend portfolio")
+```
+
+**Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21, and finally, Unassigned). -->
+
+# Project list
+List of lending projects/ASA in the Governance IDA/Blend portfolio
+
+```{r project-list}
+project_list <- wb_projects_gov |>
+  left_join(
+    wb_operations_approval,
+    by = "proj_id"
+  ) |> 
+  mutate(
+    approval_year      = if_else(
+      product_line_type == "Lending Product",
+      as.character(proj_approval_fy),
+      as.character(compute_fy(asa_approval_date))
+    ),
+    `Instrument Type`     = if_else(product_line_type != "Lending Product", "ASA", lending_instrument),
+    ida_cycle_approval = replace_na(ida_cycle_approval, "Unassigned")
+  ) |>
+  transmute(
+    `Project ID`    = proj_id,
+    `Project Name`  = proj_name,
+    `Country`       = country_name,
+    `Instrument Type`,
+    `Approval Fiscal Year` = approval_year,
+    `Approval Date` = coalesce(asa_approval_date, lubridate::dmy(proj_approval_date)),
+    `IDA Cycle`     = ida_cycle_approval,
+    `PFM project` = theme_pfm,
+    `Procurement project` = theme_procurement,
+    `Public Administration project` = theme_public_admin,
+    `Environmental and Social project` = theme_env_social
+  ) |>
+  arrange(`IDA Cycle`, `Country`) |>
+  select(-`IDA Cycle`) |>
+  mutate(
+    `Project Count` = row_number()
+  ) |> 
+  select(
+    `Project Count`,
+    everything()
+  ) 
+  
+project_list |> 
+  knitr::kable(caption = "List of operations in the Governance IDA/Blend portfolio")
+
+project_list |> 
+  readr::write_csv(
+    here("inst", "extdata", "ida_project_list.csv")
+  )
+```

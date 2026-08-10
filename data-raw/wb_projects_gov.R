@@ -392,6 +392,7 @@ wb_projects_gov_validated |>
         here::here(
           "inst",
           "extdata",
+          "region",
           paste0("wb_projects_gov_", .y$region_acronym, ".xlsx")
         ),
         overwrite = TRUE
