@@ -210,7 +210,8 @@ wb_projects_gov |>
 **Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21).
 
 # Project list
-List of lending projects/ASA in the Governance IDA/Blend portfolio
+
+List of lending projects/ASA in the Governance IDA/Blend portfolio.
 
 ```{r project-list}
 project_list <- wb_projects_gov |>
@@ -250,11 +251,6 @@ project_list <- wb_projects_gov |>
     everything()
   ) 
   
-# filter if all themes are 0
-project_list |> 
-  filter(if_all(ends_with("project"), ~ . == 0)) |>
-  glimpse()
-
 project_list |> 
   knitr::kable(caption = "List of operations in the Governance IDA/Blend portfolio")
 ```
