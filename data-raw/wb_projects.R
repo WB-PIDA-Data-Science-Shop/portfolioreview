@@ -57,6 +57,37 @@ asa_active_details <- readxl::read_xlsx(
     asa_approval_date
   )
 
+# extracted from https://standardreports.worldbank.org/reports/ASA/A0808
+# on: 2026-08-10
+asa_completed_details <- readxl::read_xlsx(
+  here("data-raw", "input", "standard-report", "A8.8 ASA Activity Details - Completed in Current and Last 4 years.xlsx")
+) |> 
+  select(
+    proj_id = `Task Id`,
+    asa_ain_approval_date = `AIS Sign Off Date`,
+    asa_cn_approval_date = `CN Approval`,
+    processing_track = `Processing Track`
+  ) |> 
+  mutate(
+    asa_approval_date = case_when(
+      processing_track == "Track 1" ~ asa_ain_approval_date,
+      processing_track == "Track 2" ~ asa_cn_approval_date,
+      T ~ NA
+    )
+  ) |> 
+  select(
+    proj_id,
+    asa_approval_date
+  )
+
+asa_details <- asa_active_details |>
+  bind_rows(
+    asa_completed_details
+  ) |> 
+  filter(
+    !is.na(proj_id) & proj_id != "Total"
+  )
+
 wb_projects <- wb_projects |> 
   select(
     proj_id,
@@ -89,7 +120,7 @@ wb_projects <- wb_projects |>
   select(-country_code_clean) |> 
   # add ASA approval date
   left_join(
-    asa_active_details,
+    asa_details,
     by = "proj_id"
   ) |> 
   # fix approval FY for ASAs because in the master file

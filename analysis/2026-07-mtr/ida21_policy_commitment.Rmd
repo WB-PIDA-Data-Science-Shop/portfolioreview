@@ -2,8 +2,7 @@
 title: "IDA21 Policy Commitment: Institutional Strengthening"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
-  word_document:
-    reference_docx: null
+  word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -34,14 +33,20 @@ wb_lending_gov <- wb_projects_gov |>
 wb_asa_gov <- wb_projects_gov |>
   filter(product_line_type == "Analytic and Advisory Activities Product")
 
-wb_operations_approval <- readr::read_csv(
-  here("data-raw", "input", "standard-report", "Operations_Lending_[FL0904]_PaginatedReport.csv")
+wb_operations_approval <- readxl::read_excel(
+  here("data-raw", "input", "standard-report", "Operations_Lending_[FL0904]_PaginatedReport.xlsx"),
+  skip = 5
 ) |> 
   janitor::clean_names() |> 
-  select(
-    proj_id = project_id2,
-    proj_approval_date = project_milestone_approval_date
-  )
+  transmute(
+    proj_id = str_extract(project_id, "^P\\d{6}"), # remove extra characters
+    proj_approval_date = as.Date(bank_approval, origin = "1899-12-30")
+  ) |>
+  # extract earliest approval date per proj_id
+  arrange(proj_id, proj_approval_date) |>
+  group_by(proj_id) |>
+  slice_head(n = 1)|>
+  ungroup()
 
 theme_labels <- function(x) {
   case_match(
@@ -55,11 +60,11 @@ theme_labels <- function(x) {
 }
 ```
 
-<!-- <!-- # Overview
+# Overview
 
 This portfolio review monitors the World Bank Governance Global Practice (GOV) portfolio in IDA-eligible and Blend countries, in support of the IDA21 Policy Commitment on Institutional Strengthening. The portfolio covers active lending operations and Advisory Services and Analytics (ASA) led by the Governance GP. Projects are classified across four thematic areas: Public Financial Management, Public Procurement, Public Administration, and Environmental & Social Governance.
 
-The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**. -->
+The current portfolio comprises **`r nrow(wb_projects_gov)` projects** across **`r n_distinct(wb_projects_gov$country_name)` countries**, of which **`r nrow(wb_lending_gov)` are lending operations** and **`r nrow(wb_asa_gov)` are ASAs**.
 
 ```{r overview-tables}
 tibble::tribble(
@@ -71,7 +76,7 @@ tibble::tribble(
 ```
 
 **Note**: Countries are only counted once across lending and ASAs. As such, the total number of countries may be less than the sum of lending and ASA counts if a country is supported both types of operations.
-<!-- 
+
 # Portfolio by IDA cycle
 
 ```{r cycle-tables}
@@ -202,7 +207,7 @@ wb_projects_gov |>
   knitr::kable(caption = "Countries supported by the Governance IDA/Blend portfolio")
 ```
 
-**Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21, and finally, Unassigned). -->
+**Note**: Where a country has operations across more than one IDA cycle, the most recent cycle is shown (IDA21, Pre-IDA21).
 
 # Project list
 List of lending projects/ASA in the Governance IDA/Blend portfolio
@@ -228,7 +233,7 @@ project_list <- wb_projects_gov |>
     `Country`       = country_name,
     `Instrument Type`,
     `Approval Fiscal Year` = approval_year,
-    `Approval Date` = coalesce(asa_approval_date, lubridate::dmy(proj_approval_date)),
+    `Approval Date` = coalesce(asa_approval_date, proj_approval_date),
     `IDA Cycle`     = ida_cycle_approval,
     `PFM project` = theme_pfm,
     `Procurement project` = theme_procurement,
@@ -245,11 +250,11 @@ project_list <- wb_projects_gov |>
     everything()
   ) 
   
+# filter if all themes are 0
 project_list |> 
-  knitr::kable(caption = "List of operations in the Governance IDA/Blend portfolio")
+  filter(if_all(ends_with("project"), ~ . == 0)) |>
+  glimpse()
 
 project_list |> 
-  readr::write_csv(
-    here("inst", "extdata", "ida_project_list.csv")
-  )
+  knitr::kable(caption = "List of operations in the Governance IDA/Blend portfolio")
 ```

@@ -210,10 +210,6 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
   )
 
 wb_projects_gov_theme <-  portfolioreview::wb_projects |>
-  # filter(
-  #   proj_status == "Active" &
-  #     lead_gp == "GOV"
-  # ) |>
   left_join(
     gov_pc_themes |> select(proj_id, theme_category),
     by = "proj_id",
@@ -273,6 +269,16 @@ wb_projects_gov <- wb_projects_gov |>
     )
   ) |>
   select(-component_procurement)
+
+# manually add thematic classifications
+wb_projects_gov <- wb_projects_gov |>
+  mutate(
+    theme_pfm = if_else(
+      proj_id %in% c("P506552", "P507203"), # Yemen Strengthening Institutions, Myanmar Economic Monitoring
+      1L,
+      theme_pfm
+    )
+  )
 
 # validation
 wb_projects_gov_validated <- wb_projects_gov |>
