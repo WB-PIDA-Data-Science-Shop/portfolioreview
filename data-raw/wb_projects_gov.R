@@ -50,10 +50,9 @@ projects_ida_20 <- read.csv(
 
 # for now, only retain the original 64 projects which were extracted in April
 # since those were the basis for the MTR validation
-wb_projects_gov <- read_rds(
-  here("inst", "extdata", "snapshot", "wb_projects_gov_20260810.rds")
-) |>
-  select(proj_id)
+wb_projects_gov <- read_csv(
+  here("inst", "extdata", "snapshot", "wb_projects_gov_2026-04-22.csv")
+)
 
 wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
@@ -95,7 +94,7 @@ regional_inputs_ids <- regional_inputs |>
 # identify regional validation inputs that were added
 regional_inputs_added <- regional_inputs_ids |>
   anti_join(
-    wb_projects_gov,
+    wb_projects_gov |> select(proj_id),
     by = "proj_id"
   )
 
@@ -111,6 +110,27 @@ wb_projects_gov <- bind_rows(
   wb_projects_gov,
   regional_projects
 )
+
+# fix project P502876 which has two rows, Bangladesh and Bhutan
+wb_projects_gov_duplicate <- wb_projects_gov |>
+  filter(
+    proj_id == "P502876"
+  ) |>
+  distinct(
+    proj_id, .keep_all = TRUE
+  ) |>
+  tidyr::separate_rows(
+    country_name,
+    sep = " and "
+  )
+
+wb_projects_gov <- wb_projects_gov |>
+  filter(
+    proj_id != "P502876"
+  ) |>
+  bind_rows(
+    wb_projects_gov_duplicate
+  )
 
 # classify projects based on themes --------------------------------------
 gov_pc_themes <- portfolioreview::wb_project_themes |>
@@ -189,11 +209,11 @@ gov_pc_themes <- portfolioreview::wb_project_themes |>
     )
   )
 
-wb_projects_gov_theme <- portfolioreview::wb_projects |>
-  filter(
-    proj_status == "Active" &
-      lead_gp == "GOV"
-  ) |>
+wb_projects_gov_theme <-  portfolioreview::wb_projects |>
+  # filter(
+  #   proj_status == "Active" &
+  #     lead_gp == "GOV"
+  # ) |>
   left_join(
     gov_pc_themes |> select(proj_id, theme_category),
     by = "proj_id",
@@ -229,6 +249,7 @@ wb_projects_gov_theme <- portfolioreview::wb_projects |>
 
 # classify procurement with components data, since procurement is a novel theme (post-2025)
 wb_projects_gov <- wb_projects_gov |>
+  select(-starts_with("theme")) |> 
   left_join(
     wb_projects_gov_theme,
     by = "proj_id"
@@ -264,7 +285,7 @@ wb_projects_gov_validated <- wb_projects_gov |>
         "P173178", # counted in the IDA 20 cycle
         # Western and Central Africa
         "P506528", # primarily a human capital project
-        "P513735",
+        "P513735", # primarily a human capital project
         "P511539", # remove duplicate
         # Middle East, North Africa, Afghanistan, and Pakistan
         "P166978", # already completed in 2023
@@ -321,15 +342,7 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
     )
   )
 
-wb_projects_gov_validated |>
-  readr::write_csv(
-    here::here(
-      "inst",
-      "extdata",
-      "wb_projects_gov.csv"
-    )
-  )
-
+# write-out --------------------------------------------------------------
 # write out regional subsets as xlsx with two sheets (Lending, ASA)
 wb_projects_gov_validated |>
   mutate(
@@ -404,4 +417,15 @@ wb_projects_gov_validated |>
 
 wb_projects_gov <- wb_projects_gov_validated
 
-usethis::use_data(wb_projects_gov, overwrite = TRUE)
+# snapshot
+wb_projects_gov |>
+  write_csv(
+    here::here(
+      "inst",
+      "extdata",
+      "snapshot",
+      sprintf("wb_projects_gov_%s.csv", Sys.Date())
+    )
+  )
+
+# usethis::use_data(wb_projects_gov, overwrite = TRUE)
