@@ -344,6 +344,12 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
 
 # write-out --------------------------------------------------------------
 # write out regional subsets as xlsx with two sheets (Lending, ASA)
+regional_dir_out <- here::here("inst", "extdata", "region", Sys.Date())
+
+if(!dir.exists(regional_dir_out)) {
+  dir.create(regional_dir_out, recursive = TRUE)
+}
+
 wb_projects_gov_validated |>
   mutate(
     region_acronym = recode(region, !!!region_acronyms),
@@ -404,11 +410,11 @@ wb_projects_gov_validated |>
 
       openxlsx::saveWorkbook(
         wb,
-        here::here(
-          "inst",
-          "extdata",
-          "region",
-          paste0("wb_projects_gov_", .y$region_acronym, ".xlsx")
+        paste0(
+          regional_dir_out,
+          "/wb_projects_gov_",
+          .y$region_acronym,
+          ".xlsx"
         ),
         overwrite = TRUE
       )
@@ -428,4 +434,4 @@ wb_projects_gov |>
     )
   )
 
-# usethis::use_data(wb_projects_gov, overwrite = TRUE)
+usethis::use_data(wb_projects_gov, overwrite = TRUE)
