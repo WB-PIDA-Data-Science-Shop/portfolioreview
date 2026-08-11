@@ -30,7 +30,7 @@ projects_ida_20 <- read.csv(
 #     proj_status == "Active" & # this filter is problematic: we need to also allow through projects that were closed during the IDA21 cycle
 #       # only retain operations that are GOV led
 #       (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
-#       (agreement_type != "RETF" | is.na(agreement_type)) &
+#       (agreement_type != "RETF") &
 #       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
 #   ) |>
 #   # drop ASAs without an AIN or CN approval date
@@ -58,7 +58,7 @@ wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Pipeline" &
       (lead_gp == "GOV") &
-      (agreement_type != "RETF" | is.na(agreement_type)) &
+      (agreement_type != "RETF") &
       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
   ) |>
   # only IDA and blend countries
@@ -79,6 +79,7 @@ regional_inputs <- fs::dir_ls(
   ) |> 
   janitor::clean_names()
 
+# include PPAs
 regional_inputs_ids <- regional_inputs |> 
   filter(
     !str_detect(
@@ -304,6 +305,8 @@ wb_projects_gov_validated <- wb_projects_gov |>
         "P166978", # already completed in 2023
         # South Asia
         "P515116" # will be dropped by June
+        # Europe and Central Asia
+        "P172924" # additional financing to Tajikistan
       ))
   )
 
@@ -434,6 +437,38 @@ wb_projects_gov_validated |>
     }
   )
 
+# write out thematic subsets in the same sheet
+themes <- c(
+  "theme_pfm", "theme_procurement", "theme_public_admin", "theme_env_social"
+)
+
+for(theme in themes) {
+  theme_names <- c(
+    "theme_pfm" = "Public Financial Management",
+    "theme_procurement" = "Procurement",
+    "theme_public_admin" = "Public Administration",
+    "theme_env_social" = "Environmental and Social"
+  )
+
+  wb_projects_gov |>
+    filter(!!sym(theme) == 1) |>
+    mutate(
+      theme = theme_names[theme]
+    ) |>
+    select(
+      -starts_with("theme_")
+    ) |>
+    write_csv(
+      here::here(
+        "inst",
+        "extdata",
+        "thematic",
+        sprintf("wb_projects_gov_%s_%s.csv", theme, Sys.Date())
+      )
+    )
+}
+
+# lazy load --------------------------------------------------------------
 wb_projects_gov <- wb_projects_gov_validated
 
 # snapshot
