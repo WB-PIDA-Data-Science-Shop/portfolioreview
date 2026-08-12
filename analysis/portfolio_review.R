@@ -6,7 +6,9 @@ library(ggthemes)
 library(tidyr)
 
 theme_set(
-  theme_minimal()
+  theme_minimal(
+    base_size = 14
+  )
 )
 
 devtools::load_all()
@@ -22,6 +24,43 @@ wb_lending_gov <- wb_projects_gov |>
 wb_asa_gov <- wb_projects_gov |> 
   filter(
     product_line_type == "Analytic and Advisory Activities Product"
+  )
+
+wb_country_ida <- portfolioreview::wb_country_list |>
+  distinct(country_code, country_name) |>
+  left_join(
+    portfolioreview::wb_income_and_region |>
+      select(country_code, lending_category),
+    by = "country_code"
+  ) |>
+  filter(
+    lending_category %in% c("IDA", "Blend")
+  ) |>
+  select(country_code, lending_category)
+
+cpia_raw <- read_csv(
+  here("data-raw", "input", "data360", "WB_CPIA_WIDEF.csv")
+) 
+
+cpia <- cpia_raw|>
+  filter(
+    COMP_BREAKDOWN_1_LABEL %in% c(
+      "Quality of Budgetary and Financial Management",
+      "Quality of Public Administration",
+      "Policies and Institutions for Environmental Sustainability",
+      "Transparency, Accountability, and Corruption in the Public Sector"
+    ),
+    OBS_STATUS != "O"
+  ) |>
+  select(
+    country_code = REF_AREA,
+    indicator = COMP_BREAKDOWN_1_LABEL,
+    `2005`:`2024`
+  ) |>
+  pivot_longer(
+    cols = `2005`:`2024`,
+    names_to = "year",
+    values_to = "value"
   )
 
 # export tables ----------------------------------------------------------
@@ -55,21 +94,6 @@ ggsave(
   height = 12,
   bg = "white"
 )
-
-# number of projects per country, by product line
-wb_projects_gov |> 
-  group_by(country_name, product_line_type) |> 
-  summarise(
-    rate = n_distinct(proj_id)
-  ) |>
-  pivot_wider(
-    names_from = product_line_type,
-    values_from = rate,
-    values_fill = 0
-  ) |> 
-  write_csv(
-    here::here("projects_by_country_product_line.csv")
-  )
 
 # distinct projects
 wb_lending_gov |> 
@@ -173,6 +197,9 @@ wb_lending_gov |>
   labs(
     x = "Fiscal year of project approval",
     y = "Number of projects"
+  ) +
+  facet_wrap(
+    vars(theme_category)
   ) +
   theme(
     legend.position = "bottom"
@@ -438,5 +465,57 @@ ggsave(
   here::here("analysis", "figures", "country_count_by_theme_cycle.png"),
   width = 8,
   height = 7,
+  bg = "white"
+)
+
+# CPIA
+cpia_ida <- cpia |>
+  inner_join(
+    wb_country_ida,
+    by = c("country_code" = "country_code")
+  )
+
+cpia_ida |>
+  summarise(
+    value = mean(value, na.rm = TRUE),
+    .by = c(year, indicator)
+  ) |>
+  mutate(
+    year = as.integer(year)
+  ) |>
+  filter(
+    year >= 2015
+  ) |>
+  ggplot(
+    aes(year, value, color = indicator)
+  ) +
+  geom_point(
+    size = 4
+  ) +
+  geom_line(
+    linewidth = 1.5
+  )  +
+  labs(
+    x = "Year",
+    y = "CPIA Score"
+  ) +
+  scale_color_solarized(
+     name = "Indicator",
+     labels = function(x) str_wrap(x, width = 35)
+  ) +
+  scale_x_continuous(
+    breaks =seq(2015, 2025, by = 1)
+  ) +
+  theme(
+    legend.position = "bottom"
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE)
+  )
+
+ggsave(
+  here::here("analysis", "figures", "cpia_score_by_year.png"),
+  width = 8,
+  height = 6,
   bg = "white"
 )
