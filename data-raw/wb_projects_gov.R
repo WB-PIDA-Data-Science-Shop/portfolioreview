@@ -30,7 +30,7 @@ projects_ida_20 <- read.csv(
 #     proj_status == "Active" & # this filter is problematic: we need to also allow through projects that were closed during the IDA21 cycle
 #       # only retain operations that are GOV led
 #       (str_detect(lead_gp, "GOV") | proj_id == "P174620") & # add Digital-led but GOV contribution project in CAR
-#       (agreement_type != "RETF") &
+#       (agreement_type != "RETF" | is.na(agreement_type)) & # exclude recipient-executed trust funds
 #       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
 #   ) |>
 #   # drop ASAs without an AIN or CN approval date
@@ -58,7 +58,7 @@ wb_projects_gov_pipeline <- portfolioreview::wb_projects |>
   filter(
     proj_status == "Pipeline" &
       (lead_gp == "GOV") &
-      (agreement_type != "RETF") &
+      (agreement_type != "RETF" | is.na(agreement_type)) &
       product_line_type %in% c("Lending Product", "Analytic and Advisory Activities Product")
   ) |>
   # only IDA and blend countries
@@ -75,18 +75,15 @@ regional_inputs <- fs::dir_ls(
   glob = "*.xlsx"
 ) |> 
   purrr::map_dfr(
-    \(file) openxlsx::read.xlsx(file, startRow = 3)
+    \(file) openxlsx::read.xlsx(file, cols = 2:6, startRow = 3)
   ) |> 
   janitor::clean_names()
 
 # include PPAs
 regional_inputs_ids <- regional_inputs |> 
   filter(
-    !str_detect(
-      p_code,
-      # exclude PPA
-      "^N/A"
-    )
+    # as per GOV FO guidance, only count currently active projects
+    status_1_delivered_2_q1_pipeline_3_q2_pipeline == 1
   ) |> 
   select(
     proj_id = p_code
@@ -304,7 +301,7 @@ wb_projects_gov_validated <- wb_projects_gov |>
         # Middle East, North Africa, Afghanistan, and Pakistan
         "P166978", # already completed in 2023
         # South Asia
-        "P515116" # will be dropped by June
+        "P515116", # will be dropped by June
         # Europe and Central Asia
         "P172924" # additional financing to Tajikistan
       ))
