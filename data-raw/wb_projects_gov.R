@@ -350,7 +350,7 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   mutate(
     ida_cycle_approval = case_when(
       proj_approval_fy < 2026 ~ "Pre-IDA21",
-      proj_approval_fy == 2026 ~ "IDA21",
+      proj_approval_fy >= 2026 ~ "IDA21",
       T ~ NA_character_
     )
   )
