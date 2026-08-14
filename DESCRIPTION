@@ -16,4 +16,5 @@ Imports:
     dplyr,
     httr2,
     lubridate,
-    purrr
+    purrr,
+    rmarkdown

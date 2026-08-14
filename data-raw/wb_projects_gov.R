@@ -447,6 +447,12 @@ for(theme in themes) {
     "theme_env_social" = "Environmental and Social"
   )
 
+  thematic_dir <- here::here("inst", "extdata", "thematic", Sys.Date())
+
+  if(!dir.exists(thematic_dir)) {
+    dir.create(thematic_dir, recursive = TRUE)
+  }
+
   wb_projects_gov |>
     filter(!!sym(theme) == 1) |>
     mutate(
@@ -457,11 +463,8 @@ for(theme in themes) {
     ) |>
     write_csv(
       here::here(
-        "inst",
-        "extdata",
-        "thematic",
-        theme,
-        sprintf("wb_projects_gov_%s_%s.csv", theme, Sys.Date())
+        thematic_dir,
+        sprintf("wb_projects_gov_%s.csv", theme)
       )
     )
 }
