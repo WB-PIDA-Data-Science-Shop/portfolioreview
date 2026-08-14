@@ -460,6 +460,7 @@ for(theme in themes) {
         "inst",
         "extdata",
         "thematic",
+        theme,
         sprintf("wb_projects_gov_%s_%s.csv", theme, Sys.Date())
       )
     )
