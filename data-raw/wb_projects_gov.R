@@ -126,6 +126,11 @@ wb_projects_gov_duplicate <- wb_projects_gov |>
       country_name == "Bangladesh" ~ "People's Republic of Bangladesh",
       country_name == "Bhutan" ~ "Kingdom of Bhutan",
       T ~ country_name
+    ),
+    country_code = case_when(
+      country_name == "People's Republic of Bangladesh" ~ "BGD",
+      country_name == "Kingdom of Bhutan" ~ "BTN",
+      T ~ country_name
     )
   )
 
