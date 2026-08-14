@@ -468,17 +468,46 @@ ggsave(
   bg = "white"
 )
 
+# cpia -------------------------------------------------------------------
 # CPIA
+gov_ida <- wb_projects_gov |> 
+  distinct(country_code) |>
+  mutate(
+    pc10_supported = "Yes"
+  )
+
 cpia_ida <- cpia |>
   inner_join(
     wb_country_ida,
     by = c("country_code" = "country_code")
+  ) |>
+  left_join(
+    gov_ida,
+    by = c("country_code")
+  ) |>
+  replace_na(
+    list(pc10_supported = "No")
+  ) |>
+  mutate(
+    indicator = factor(
+      indicator,
+      levels = c(
+        "Quality of Budgetary and Financial Management",
+        "Quality of Public Administration",
+        "Transparency, Accountability, and Corruption in the Public Sector",
+        "Policies and Institutions for Environmental Sustainability"
+      )
+    ),
+    pc10_supported = factor(
+      pc10_supported,
+      levels = c("Yes", "No")
+    )
   )
 
 cpia_ida |>
   summarise(
     value = mean(value, na.rm = TRUE),
-    .by = c(year, indicator)
+    .by = c(year, indicator, pc10_supported)
   ) |>
   mutate(
     year = as.integer(year)
@@ -487,35 +516,55 @@ cpia_ida |>
     year >= 2015
   ) |>
   ggplot(
-    aes(year, value, color = indicator)
+    aes(year, value, color = pc10_supported)
   ) +
   geom_point(
-    size = 4
+    size = 4,
+    show.legend = FALSE
+  ) +
+  ggrepel::geom_text_repel(
+    data = . %>% filter(year %in% c(2015, 2018, 2021, 2024)),
+    aes(
+      label = round(value, 2)
+    ),
+    vjust = -0.5,
+    size = 5,
+    show.legend = FALSE
   ) +
   geom_line(
-    linewidth = 1.5
+    linewidth = 1.5,
+    key_glyph = draw_key_rect
   )  +
   labs(
     x = "Year",
     y = "CPIA Score"
   ) +
-  scale_color_solarized(
-     name = "Indicator",
+  scale_color_tableau(
+     name = "Supported by IDA Prosperity PC10",
      labels = function(x) str_wrap(x, width = 35)
   ) +
   scale_x_continuous(
-    breaks =seq(2015, 2025, by = 1)
-  ) +
-  theme(
-    legend.position = "bottom"
+    breaks = seq(2015, 2025, by = 1)
   ) +
   guides(
-    color = guide_legend(nrow = 2, byrow = TRUE)
+    color = guide_legend(nrow = 1, byrow = TRUE)
+  ) +
+  facet_wrap(
+    vars(indicator),
+    labeller = labeller(indicator = label_wrap_gen(width = 35))
+  ) +
+  theme_bw(
+    base_size = 14
+  ) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(size = 12, face = "bold")
   )
 
 ggsave(
   here::here("analysis", "figures", "cpia_score_by_year.png"),
-  width = 8,
-  height = 6,
+  width = 10,
+  height = 8,
   bg = "white"
 )
