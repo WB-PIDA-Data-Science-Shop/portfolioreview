@@ -8,6 +8,9 @@ library(here)
 
 devtools::load_all()
 
+# check why Haiti is missing: it has a strong citizen engagement 
+# sub-component.
+
 # read-in data -----------------------------------------------------------
 wb_country_ida <- portfolioreview::wb_country_list |>
   distinct(country_code, country_name) |>
@@ -79,11 +82,12 @@ regional_inputs <- fs::dir_ls(
   ) |> 
   janitor::clean_names()
 
-# include PPAs
+# drop PPA
 regional_inputs_ids <- regional_inputs |> 
   filter(
     # as per GOV FO guidance, only count currently active projects
-    status_1_delivered_2_q1_pipeline_3_q2_pipeline == 1
+    status_1_delivered_2_q1_pipeline_3_q2_pipeline == 1 &
+      p_code != "N/A"
   ) |> 
   select(
     proj_id = p_code
@@ -98,7 +102,7 @@ regional_inputs_added <- regional_inputs_ids |>
 
 # retrieve information from original wb_projects
 regional_projects <- regional_inputs_added |> 
-  inner_join(
+  left_join(
     portfolioreview::wb_projects,
     by = "proj_id"
   )
@@ -136,7 +140,8 @@ wb_projects_gov_duplicate <- wb_projects_gov |>
 
 wb_projects_gov <- wb_projects_gov |>
   filter(
-    proj_id != "P502876"
+    proj_id != "P502876" &
+      proj_id != "P517498" # remove Sindh project because it is only IBRD funded
   ) |>
   bind_rows(
     wb_projects_gov_duplicate
@@ -355,7 +360,7 @@ wb_projects_gov_validated <- wb_projects_gov_validated |>
   mutate(
     ida_cycle_approval = case_when(
       proj_approval_fy < 2026 ~ "Pre-IDA21",
-      proj_approval_fy >= 2026 ~ "IDA21",
+      proj_approval_fy >= 2026 ~ "IDA21", # include Belize PPA
       T ~ NA_character_
     )
   )

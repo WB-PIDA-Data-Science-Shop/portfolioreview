@@ -38,8 +38,8 @@ wb_country_ida <- portfolioreview::wb_country_list |>
   ) |>
   select(country_code, lending_category)
 
-cpia_raw <- read_csv(
-  here("data-raw", "input", "data360", "WB_CPIA_WIDEF.csv")
+cpia_raw <- readr::read_csv(
+  here::here("data-raw", "input", "data360", "WB_CPIA_WIDEF.csv")
 ) 
 
 cpia <- cpia_raw|>
@@ -468,6 +468,81 @@ ggsave(
   bg = "white"
 )
 
+# cumulative number of projects by thematic area
+wb_projects_gov |>
+  pivot_longer(
+    cols = starts_with("theme_"),
+    names_to = "theme",
+    values_to = "counter"
+  ) |>
+  mutate(
+    approval_fy = coalesce(
+      proj_approval_fy, lubridate::year(asa_approval_date)
+    )
+  ) |>
+  filter(
+    approval_fy >= 2020
+  ) |>
+  summarise(
+    counter = sum(counter),
+    .by = c("theme", "approval_fy")
+  ) |>
+  arrange(
+    theme, approval_fy
+  ) |>
+  mutate(
+    cumulative_projects = cumsum(counter),
+    .by = c("theme")
+  ) |>
+  mutate(
+    theme_category = str_remove(theme, "theme_"),
+    theme_category = case_match(
+      theme_category,
+      "pfm"                  ~ "Public Financial Management",
+      "procurement"          ~ "Public Procurement",
+      "public_admin"         ~ "Public Administration",
+      "env_social" ~ "Environmental & Social"
+    )
+  ) |> 
+  ggplot(
+    aes(approval_fy, cumulative_projects, color = theme_category)
+  ) +
+  geom_point(
+    size = 4
+  ) +
+  geom_line(
+    linewidth = 1.5
+  ) +
+  scale_color_tableau(
+     name = "Institutional Dimension",
+     labels = function(x) str_wrap(x, width = 35)
+  ) +
+  scale_x_continuous(
+    breaks = seq(2010, 2025, by = 1)
+  ) +
+  guides(
+    color = guide_legend(nrow = 2, byrow = TRUE)
+  ) +
+  theme_bw(
+    base_size = 14
+  ) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    strip.text = element_text(size = 12, face = "bold")
+  ) +
+  labs(
+    x = "Project Approval Year",
+    y = "Cumulative Number of Projects"
+  )
+
+ggsave(
+  here::here("analysis", "figures", "cumulative_projects_by_theme.png"),
+  width = 10,
+  height = 8,
+  bg = "white"
+)
+
 # cpia -------------------------------------------------------------------
 # CPIA
 gov_ida <- wb_projects_gov |> 
@@ -507,23 +582,23 @@ cpia_ida <- cpia |>
 cpia_ida |>
   summarise(
     value = mean(value, na.rm = TRUE),
-    .by = c(year, indicator, pc10_supported)
+    .by = c(year, indicator)
   ) |>
   mutate(
     year = as.integer(year)
   ) |>
   filter(
-    year >= 2015
+    year >= 2020
   ) |>
   ggplot(
-    aes(year, value, color = pc10_supported)
+    aes(year, value, color = indicator)
   ) +
   geom_point(
     size = 4,
     show.legend = FALSE
   ) +
   ggrepel::geom_text_repel(
-    data = . %>% filter(year %in% c(2015, 2018, 2021, 2024)),
+    data = . %>% filter(year %in% c(2020, 2024)),
     aes(
       label = round(value, 2)
     ),
@@ -540,19 +615,19 @@ cpia_ida |>
     y = "CPIA Score"
   ) +
   scale_color_tableau(
-     name = "Supported by IDA Prosperity PC10",
+     name = "Institutional Dimension",
      labels = function(x) str_wrap(x, width = 35)
   ) +
   scale_x_continuous(
-    breaks = seq(2015, 2025, by = 1)
+    breaks = seq(2010, 2025, by = 1)
   ) +
   guides(
-    color = guide_legend(nrow = 1, byrow = TRUE)
+    color = guide_legend(nrow = 2, byrow = TRUE)
   ) +
-  facet_wrap(
-    vars(indicator),
-    labeller = labeller(indicator = label_wrap_gen(width = 35))
-  ) +
+  # facet_wrap(
+  #   vars(indicator),
+  #   labeller = labeller(indicator = label_wrap_gen(width = 35))
+  # ) +
   theme_bw(
     base_size = 14
   ) +
