@@ -67,6 +67,14 @@ wb_documents_cliar <- wb_documents_cliar |>
     cliar_mention = cliar_mentions > 0
   )
 
+# downloads --------------------------------------------------------------
+# "Total Downloads" from the Documents & Reports Download Stats page;
+# requires WB_DOCS_API_KEY in .Renviron
+wb_documents_downloads <- fetch_wb_document_downloads(wb_documents_cliar$guid)
+
+wb_documents_cliar <- wb_documents_cliar |>
+  left_join(wb_documents_downloads, by = "guid")
+
 # analyze ----------------------------------------------------------------
 wb_documents_cliar |>
   count(
@@ -87,6 +95,7 @@ wb_documents_cliar |>
     doc_date,
     cliar_mentions,
     cliar_context,
+    downloads,
     url
   ) |>
   arrange(desc(doc_date)) |>

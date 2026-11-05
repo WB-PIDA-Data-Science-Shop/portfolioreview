@@ -174,3 +174,66 @@ fetch_wb_document_text <- function(
     txt_path = dplyr::if_else(file.exists(txt_path), txt_path, NA_character_)
   )
 }
+#' Fetch total download counts for World Bank documents
+#'
+#' Queries the statistics API behind the Documents & Reports "Download Stats"
+#' page (`documents-reports/downloadstats?docid={guid}`) and returns its
+#' "Total Downloads" figure for each document. The API accepts a JSON array of
+#' GUIDs, so documents are requested in batches.
+#'
+#' @param guid Character. Document GUIDs (the `docid` in Documents & Reports URLs).
+#' @param batch_size Integer. Number of GUIDs sent per request.
+#' @param api_key Character. API key sent as `X-API-Key`; the public key found
+#'   in the `data-api-key` attribute of the Download Stats page. Read from the
+#'   `WB_DOCS_API_KEY` environment variable by default.
+#'
+#' @return A tibble with columns `guid` and `downloads`, one row per unique
+#'   GUID. As on the Download Stats page, documents missing from the response
+#'   have 0 downloads. `downloads` is `NA` when the request for that batch failed.
+#'
+#' @importFrom httr2 request req_headers req_body_json req_retry req_throttle req_perform resp_body_json
+#' @importFrom purrr map map_chr map_dbl list_rbind
+#' @importFrom dplyr tibble coalesce
+fetch_wb_document_downloads <- function(
+    guid,
+    batch_size = 100,
+    api_key = Sys.getenv("WB_DOCS_API_KEY")
+) {
+  if (!nzchar(api_key)) {
+    stop("No API key: set WB_DOCS_API_KEY in .Renviron", call. = FALSE)
+  }
+
+  guid <- unique(guid[!is.na(guid)])
+  batches <- split(guid, ceiling(seq_along(guid) / batch_size))
+
+  purrr::map(
+    batches,
+    \(batch) {
+      resp <- tryCatch(
+        httr2::request("https://extsearch.worldbank.org/api/statistics/totalcount") |>
+          httr2::req_headers(`X-API-Key` = api_key, .redact = "X-API-Key") |>
+          # as.list() so a single GUID is still sent as an array
+          httr2::req_body_json(as.list(batch)) |>
+          httr2::req_retry(max_tries = 3) |>
+          httr2::req_throttle(capacity = 5, fill_time_s = 1) |>
+          httr2::req_perform() |>
+          httr2::resp_body_json(),
+        error = \(e) {
+          warning("Download count request failed: ", conditionMessage(e), call. = FALSE)
+          NULL
+        }
+      )
+      if (is.null(resp)) {
+        return(dplyr::tibble(guid = batch, downloads = NA_real_))
+      }
+      counts <- purrr::map_dbl(resp, \(x) as.numeric(x$count))
+      names(counts) <- purrr::map_chr(resp, \(x) x$guid)
+      dplyr::tibble(
+        guid = batch,
+        downloads = dplyr::coalesce(unname(counts[batch]), 0)
+      )
+    },
+    .progress = TRUE
+  ) |>
+    purrr::list_rbind()
+}
