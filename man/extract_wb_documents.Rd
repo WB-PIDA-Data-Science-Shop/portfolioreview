@@ -16,8 +16,8 @@ are removed.
 }
 \description{
 Extracts documents from a World Bank API JSON response, collapses the nested
-\code{authors} field to a semicolon-separated string, and returns a tibble with
-one row per document.
+\code{authors} and \code{lndinstr} (lending instrument) fields to semicolon-separated
+strings, and returns a tibble with one row per document.
 }
 \examples{
 \dontrun{

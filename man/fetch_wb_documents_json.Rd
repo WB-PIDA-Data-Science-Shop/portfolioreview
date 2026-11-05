@@ -11,7 +11,8 @@ fetch_wb_documents_json(
   enddate = "2026-04-22",
   doc_type = NULL,
   os = 0,
-  rows = 200
+  rows = 200,
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ fetch_wb_documents_json(
 \item{os}{Integer. Offset (starting row).}
 
 \item{rows}{Integer. Number of rows to return.}
+
+\item{...}{Additional query parameters passed to the API (e.g., \code{majdocty_exact}).}
 }
 \value{
 A list from the parsed JSON response.
